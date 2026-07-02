@@ -9,6 +9,13 @@ data/
 *.csv
 *.zip
 
+# Datos: los originales viven en Drive, no en el repo.
+# Los convertidos son reproducibles a partir de los originales,
+# así que tampoco hace falta versionarlos (pesan y son datos, no código).
+data/processed/*
+!data/processed/.gitkeep
+
+
 # Modelos entrenados (también pesan, van aparte)
 *.pkl
 *.joblib
@@ -24,6 +31,7 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
+
 # Streamlit
 .streamlit/secrets.toml
 
@@ -31,3 +39,7 @@ __pycache__/
 .DS_Store
 .vscode/
 .idea/
+
+# Configuración local (contiene tu ruta personal de Drive)
+config.yaml
+

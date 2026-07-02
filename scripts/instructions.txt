@@ -1,0 +1,11 @@
+Instrucciones para cambiar los archivos .tsv y .txt a .csv
+
+1. Modificar la ruta de dónde vienen los datos en config.yaml
+2. Abrir una nueva terminal en Visual Studio Code
+3. Asegurarnos de que la ruta en la que está la terminal es la correcta (carpeta Onco_Seq_Explorer)
+4. Crear el entorno virtual con python -m venv venv
+5. *Si da problemas: Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+6. Instalar dependencias: pip install pyyaml chardet
+7.Ejecutar el script: pip install pyyaml chardet
+8 ejecutar: cd scripts
+9. ejecutar el .py: python convertir_a_csv.py
