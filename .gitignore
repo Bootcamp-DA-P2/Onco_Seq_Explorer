@@ -1,0 +1,33 @@
+# Entorno virtual
+venv/
+env/
+.venv/
+
+# Datos (pesan mucho y no deben ir al repo)
+data/
+*.tar.gz
+*.csv
+*.zip
+
+# Modelos entrenados (también pesan, van aparte)
+*.pkl
+*.joblib
+models/*.pkl
+
+# Base de datos local
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Sistema / editor
+.DS_Store
+.vscode/
+.idea/
