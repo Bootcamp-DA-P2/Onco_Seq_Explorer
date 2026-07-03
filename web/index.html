@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OncoSeq Explorer — Clasificación de tumores por expresión génica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7FAFD;
+    --surface: #FFFFFF;
+    --ink: #0A1F33;
+    --ink-soft: #4A5B72;
+    --accent: #1547E8;
+    --accent-hover: #0F37C4;
+    --accent-soft: #E8EFFE;
+    --line: #DCE6F5;
+    --data: #12B5B0;
+
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* Faint lab-grid texture across the whole page */
+  .grid-texture {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
+  }
+
+  /* ---------- NAV ---------- */
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 56px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: var(--accent);
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .logo-mark::before,
+  .logo-mark::after {
+    content: '';
+    position: absolute;
+    background: var(--surface);
+    border-radius: 1px;
+  }
+
+  .logo-mark::before {
+    width: 12px;
+    height: 2px;
+    top: 8px;
+    left: 8px;
+  }
+
+  .logo-mark::after {
+    width: 2px;
+    height: 12px;
+    top: 8px;
+    left: 8px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .nav-links a {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: color 0.2s ease;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  .nav-cta {
+    padding: 10px 20px;
+    background: var(--ink);
+    color: var(--surface) !important;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .nav-cta:hover { background: var(--accent); }
+
+  @media (max-width: 720px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+    nav { padding: 24px 24px; }
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 96px 56px 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  @media (max-width: 720px) {
+    .hero { padding: 56px 24px 48px; }
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin-bottom: 28px;
+  }
+
+  .eyebrow-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--data);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(36px, 5.4vw, 68px);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    max-width: 900px;
+    color: var(--ink);
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    margin-top: 24px;
+    max-width: 600px;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .hero-actions {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 32px;
+    background: var(--accent);
+    color: var(--surface);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(21,71,232,0.1), 0 8px 24px rgba(21,71,232,0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 1px 2px rgba(21,71,232,0.12), 0 14px 32px rgba(21,71,232,0.34);
+  }
+
+  .btn-primary svg { transition: transform 0.2s ease; }
+  .btn-primary:hover svg { transform: translateX(3px); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    padding: 18px 4px;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .btn-secondary:hover {
+    color: var(--ink);
+    border-color: var(--line);
+  }
+
+  /* ---------- STAT STRIP ---------- */
+  .stat-strip {
+    margin-top: 72px;
+    display: flex;
+    gap: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    width: 100%;
+  }
+
+  .stat {
+    flex: 1;
+    padding: 24px 16px;
+    text-align: center;
+    border-right: 1px solid var(--line);
+  }
+
+  .stat:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .stat-label {
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.01em;
+  }
+
+  @media (max-width: 720px) {
+    .stat-strip { flex-wrap: wrap; }
+    .stat { flex: 1 1 50%; border-bottom: 1px solid var(--line); }
+  }
+
+  /* ---------- GENE TICKER (signature element) ---------- */
+  .ticker-wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    overflow: hidden;
+    padding: 20px 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    animation: scroll-left 48s linear infinite;
+    gap: 40px;
+  }
+
+  .ticker-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  .ticker-item .gid { color: var(--ink); font-weight: 500; }
+  .ticker-item .gval { color: var(--data); }
+
+  @keyframes scroll-left {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track { animation: none; }
+    .eyebrow-dot { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-texture"></div>
+
+<nav>
+  <div class="logo">
+    <div class="logo-mark"></div>
+    OncoSeq Explorer
+  </div>
+  <div class="nav-links">
+    <a href="#proyecto">Sobre el proyecto</a>
+    <a href="#metodo">Cómo funciona</a>
+    <a href="#equipo">Equipo</a>
+    <a href="#demo" class="nav-cta">Abrir la demo</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="eyebrow">
+    <span class="eyebrow-dot"></span>
+    TCGA Pan-Cancer RNA-Seq · 5 tipos de tumor
+  </div>
+
+  <h1>Prediciendo el origen de un tumor <em>a partir de su expresión génica</em></h1>
+
+  <p class="hero-sub">
+    801 muestras, 20.531 genes analizados. Un pipeline de machine learning que identifica el tipo de cáncer — mama, riñón, pulmón, próstata o colon — únicamente a partir de su firma de expresión génica.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#demo" class="btn-primary">
+      Entrar a la demo interactiva
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <a href="#metodo" class="btn-secondary">Ver cómo funciona ↓</a>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat">
+      <div class="stat-num">801</div>
+      <div class="stat-label">muestras de tejido</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">20.531</div>
+      <div class="stat-label">genes por muestra</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">05</div>
+      <div class="stat-label">tipos de tumor</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">TCGA</div>
+      <div class="stat-label">fuente de datos</div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker-wrap">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<script>
+  // Signature element: simulated live read-out of gene expression values,
+  // styled after the actual dataset structure (gene_id : expression value)
+  const track = document.getElementById('tickerTrack');
+  const items = [];
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 24; j++) {
+      const geneId = Math.floor(Math.random() * 20531);
+      const val = (Math.random() * 15).toFixed(2);
+      const el = document.createElement('div');
+      el.className = 'ticker-item';
+      el.innerHTML = `<span class="gid">gene_${geneId}</span><span class="gval">${val}</span>`;
+      track.appendChild(el);
+    }
+  }
+</script>
+
+</body>
+</html>
