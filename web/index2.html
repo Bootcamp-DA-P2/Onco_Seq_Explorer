@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OncoSeq Explorer — Clasificación de tumores por expresión génica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FBFDFF;
+    --surface: #FFFFFF;
+    --ink: #0C1E30;
+    --ink-soft: #6B7C8F;
+    --ink-faint: #A6B4C2;
+    --accent: #1652F0;
+    --accent-hover: #0F3FC7;
+    --line: #E7EDF4;
+    --line-strong: #D2DCE8;
+    --data: #14B8B3;
+
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- NAV ---------- */
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 36px 64px;
+    max-width: 1360px;
+    margin: 0 auto;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: 0.01em;
+  }
+
+  .logo-mark {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .logo-mark::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .nav-links a {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    letter-spacing: 0.01em;
+    transition: color 0.2s ease;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  .nav-cta {
+    padding: 11px 22px;
+    border: 1px solid var(--line-strong);
+    border-radius: 100px;
+    color: var(--ink) !important;
+    font-size: 13px;
+    font-weight: 400;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .nav-cta:hover {
+    background: var(--ink);
+    color: var(--surface) !important;
+  }
+
+  @media (max-width: 720px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+    nav { padding: 28px 24px; }
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    position: relative;
+    z-index: 1;
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 100px 64px 0;
+  }
+
+  @media (max-width: 720px) {
+    .hero { padding: 56px 24px 0; }
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    margin-bottom: 40px;
+  }
+
+  .eyebrow-line {
+    width: 32px;
+    height: 1px;
+    background: var(--data);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(34px, 4.8vw, 62px);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    max-width: 880px;
+    color: var(--ink);
+  }
+
+  h1 strong {
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    margin-top: 28px;
+    max-width: 520px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    font-weight: 300;
+  }
+
+  .hero-actions {
+    margin-top: 48px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 17px 30px;
+    background: var(--accent);
+    color: var(--surface);
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    border-radius: 100px;
+    transition: background 0.25s ease, transform 0.25s ease;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary svg { transition: transform 0.25s ease; }
+  .btn-primary:hover svg { transform: translateX(3px); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ink-soft);
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--line-strong);
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .btn-secondary:hover {
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+
+  /* ---------- STAT STRIP ---------- */
+  .stat-strip {
+    margin-top: 104px;
+    display: flex;
+    gap: 56px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+
+  .stat {
+    flex: 1;
+  }
+
+  .stat-num {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink);
+  }
+
+  .stat-label {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ink-faint);
+    letter-spacing: 0.02em;
+  }
+
+  @media (max-width: 720px) {
+    .stat-strip { flex-wrap: wrap; gap: 28px; }
+    .stat { flex: 1 1 40%; }
+  }
+
+  /* ---------- GENE READOUT (signature element, minimal) ---------- */
+  .ticker-wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    overflow: hidden;
+    padding: 26px 0;
+    margin-top: 64px;
+    border-top: 1px solid var(--line);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    animation: scroll-left 90s linear infinite;
+    gap: 56px;
+  }
+
+  .ticker-item {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  .ticker-item .gid { color: var(--ink-soft); }
+  .ticker-item .gval { color: var(--data); }
+
+  @keyframes scroll-left {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-mark"></div>
+    OncoSeq Explorer
+  </div>
+  <div class="nav-links">
+    <a href="#proyecto">Sobre el proyecto</a>
+    <a href="#metodo">Cómo funciona</a>
+    <a href="#equipo">Equipo</a>
+    <a href="#demo" class="nav-cta">Abrir la demo</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="eyebrow">
+    <span class="eyebrow-line"></span>
+    TCGA PAN-CANCER RNA-SEQ · 5 TIPOS DE TUMOR
+  </div>
+
+  <h1>Prediciendo el origen de un tumor <strong>a partir de su expresión génica</strong></h1>
+
+  <p class="hero-sub">
+    801 muestras, 20.531 genes analizados. Un pipeline de machine learning que identifica el tipo de cáncer — mama, riñón, pulmón, próstata o colon — únicamente a partir de su firma de expresión génica.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#demo" class="btn-primary">
+      Entrar a la demo interactiva
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <a href="#metodo" class="btn-secondary">Ver cómo funciona</a>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat">
+      <div class="stat-num">801</div>
+      <div class="stat-label">muestras de tejido</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">20.531</div>
+      <div class="stat-label">genes por muestra</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">05</div>
+      <div class="stat-label">tipos de tumor</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">TCGA</div>
+      <div class="stat-label">fuente de datos</div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker-wrap">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<script>
+  const track = document.getElementById('tickerTrack');
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 18; j++) {
+      const geneId = Math.floor(Math.random() * 20531);
+      const val = (Math.random() * 15).toFixed(2);
+      const el = document.createElement('div');
+      el.className = 'ticker-item';
+      el.innerHTML = `<span class="gid">gene_${geneId}</span><span class="gval">${val}</span>`;
+      track.appendChild(el);
+    }
+  }
+</script>
+
+</body>
+</html>
