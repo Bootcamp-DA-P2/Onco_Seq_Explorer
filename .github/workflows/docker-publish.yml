@@ -39,7 +39,7 @@ jobs:
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
         continue-on-error: true  # No fallar si el webhook falla
 
-      # Notificación del resultado
+      # Notificación del resultado final
       - name: Notificar resultado del deployment
         if: always()
         run: |
