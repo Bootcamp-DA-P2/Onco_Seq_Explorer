@@ -1,0 +1,48 @@
+name: Publicar Imagen de Docker en Docker Hub
+
+Este flujo de trabajo se ejecuta cada vez que hay un push a la rama 'main'
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    # Usamos la última versión de Ubuntu para ejecutar nuestro trabajo
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Obtenemos el código del repositorio
+      
+name: Checkout del código
+      uses: actions/checkout@v4
+
+      # 2. Iniciamos sesión en Docker Hub
+      
+name: Iniciar sesión en Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 3. Construimos la imagen y la publicamos
+      # Agregar múltiples tags incluyendo latest
+      
+name: Construir y publicar la imagen de Docker
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |${{ secrets.DOCKERHUB_USERNAME }}/python_deployment_automate:latest${{ secrets.DOCKERHUB_USERNAME }}/python_deployment_automate:v${{ github.run_number }}# Disparar el deploy hook de Render después de subir la imagen
+name: Disparar deployment en Render
+    if: success()
+    run: |
+      curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+    continue-on-error: true  # No fallar si el webhook falla
+
+      # Notificación del resultado
+      
+name: Notificar resultado del deployment
+      if: always()
+      run: |
+        echo "✅ Imagen Docker publicada exitosamente"
+        echo "🚀 Deploy hook disparado en Render"
