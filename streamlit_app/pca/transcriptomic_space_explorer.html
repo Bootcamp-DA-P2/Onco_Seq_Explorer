@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcriptomic Space Explorer</title>
+    <!-- Plotly.js CDN -->
+    <script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
+    <!-- PapaParse CDN para parsing eficiente de CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        /* ==========================================================================
+           RESET & BASE STYLES
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: transparent;
+            color: #1E293B;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ==========================================================================
+           LAYOUT STRUCTURE
+           ========================================================================== */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            min-height: 100vh;
+            padding: 20px;
+            gap: 16px;
+        }
+
+        header.explorer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .title-area h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: #0F172A;
+            margin-bottom: 2px;
+        }
+
+        .title-area p {
+            font-size: 0.875rem;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        /* Controls bar */
+        .controls-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .mode-selector, .filter-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .btn-group {
+            display: inline-flex;
+            background: #F1F5F9;
+            padding: 2px;
+            border-radius: 6px;
+        }
+
+        .btn-option {
+            border: none;
+            background: transparent;
+            padding: 6px 12px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: #64748B;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-option.active {
+            background: #FFFFFF;
+            color: #0F172A;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        select.filter-select {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #CBD5E1;
+            background: #FFFFFF;
+            font-size: 0.8125rem;
+            color: #0F172A;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Main Visual Grid */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 240px;
+            gap: 16px;
+            flex-grow: 1;
+            min-height: 520px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .viewport-wrapper {
+            position: relative;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 8px;
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+        }
+
+        #plotly-canvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Sidebar Info Card */
+        .sidebar-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sidebar-card h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #475569;
+            border-bottom: 1px solid #E2E8F0;
+            padding-bottom: 8px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .stat-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        /* Scientific Description */
+        .description-card {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.8125rem;
+            line-height: 1.5;
+            color: #475569;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #475569;
+            z-index: 10;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="explorer-header">
+            <div class="title-area">
+                <h1>Transcriptomic Space Explorer</h1>
+                <p>Principal Component Analysis (3D Projection)</p>
+            </div>
+        </header>
+
+        <!-- Dynamic Controls -->
+        <div class="controls-bar">
+            <div class="mode-selector">
+                <span class="control-label">Color Mode:</span>
+                <div class="btn-group">
+                    <button class="btn-option active" id="btn-mode-grupo" onclick="switchColorMode('grupo')">Grupo</button>
+                    <button class="btn-option" id="btn-mode-tipo" onclick="switchColorMode('tipo')">Tipo</button>
+                    <button class="btn-option" id="btn-mode-cohorte" onclick="switchColorMode('cohorte')">Cohorte</button>
+                </div>
+            </div>
+
+            <div class="filter-selector">
+                <span class="control-label">Filter Subgroup:</span>
+                <select id="filter-select" class="filter-select" onchange="applyFilter(this.value)">
+                    <option value="ALL">Todos</option>
+                    <option value="NORMAL">Normal</option>
+                    <option value="TUMOR">Tumor</option>
+                    <option value="BRCA">BRCA</option>
+                    <option value="COAD">COAD</option>
+                    <option value="KIRC">KIRC</option>
+                    <option value="LUAD">LUAD</option>
+                    <option value="PRAD">PRAD</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Visual Grid -->
+        <div class="main-content">
+            <div class="viewport-wrapper">
+                <div id="loading" class="loading-overlay">Cargando espacio transcriptómico (pca_data.csv)...</div>
+                <div id="plotly-canvas"></div>
+            </div>
+
+            <aside class="sidebar-card">
+                <h3>Metadata</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Total Muestras</span>
+                    <span class="stat-value" id="stat-samples">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Cohortes Diagnósticas</span>
+                    <span class="stat-value" id="stat-cohorts">5</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Reducción Espacial</span>
+                    <span class="stat-value">PCA (3D)</span>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Description -->
+        <footer class="description-card">
+            Este gráfico 3D representa el mapa de expresión génica (espacio transcriptómico) simplificado en tres ejes principales (PC1, PC2 y PC3). La cercanía entre los puntos indica similitud biológica: permite observar de forma intuitiva cómo se agrupan las muestras según su tipo de tejido y cohorte, diferenciando claramente las muestras sanas de las tumorales.
+        </footer>
+    </div>
+
+    <script>
+        /**
+         /**
+         * PALETA DE COLORES 
+         */
+        const PALETTE = {
+            // Mapeo exacto de los 10 grupos (minúsculas y mayúsculas para total compatibilidad)
+            'tumor_BRCA':  '#636EFA', // Azul violáceo
+            'normal_BRCA': '#EF553B', // Rojo-Naranja
+            'tumor_COAD':  '#00CC96', // Verde esmeralda / menta
+            'normal_COAD': '#AB63FA', // Púrpura / Violeta
+            'tumor_KIRC':  '#FFA15A', // Naranja claro
+            'normal_KIRC': '#19D3F3', // Cían brillante
+            'tumor_LUAD':  '#FF6692', // Rosa chicle
+            'normal_LUAD': '#B6E880', // Verde lima / manzana
+            'tumor_PRAD':  '#FF97FF', // Magenta / Rosa claro
+            'normal_PRAD': '#FECB52', // Amarillo / Mostaza
+
+            // Variantes en mayúsculas (por si tu CSV tiene las etiquetas en mayúsculas)
+            'TUMOR_BRCA':  '#636EFA',
+            'NORMAL_BRCA': '#EF553B',
+            'TUMOR_COAD':  '#00CC96',
+            'NORMAL_COAD': '#AB63FA',
+            'TUMOR_KIRC':  '#FFA15A',
+            'NORMAL_KIRC': '#19D3F3',
+            'TUMOR_LUAD':  '#FF6692',
+            'NORMAL_LUAD': '#B6E880',
+            'TUMOR_PRAD':  '#FF97FF',
+            'NORMAL_PRAD': '#FECB52',
+
+            // Colores de respaldo para los filtros genéricos de 'Tipo' y 'Cohorte'
+            'TUMOR':   '#636EFA',
+            'NORMAL':  '#EF553B',
+            'tumor':   '#636EFA',
+            'normal':  '#EF553B',
+            'BRCA':    '#636EFA',
+            'COAD':    '#00CC96',
+            'KIRC':    '#FFA15A',
+            'LUAD':    '#FF6692',
+            'PRAD':    '#FF97FF'
+        };
+
+        let rawData = [];
+        let activeColorMode = 'grupo'; // 'grupo' | 'tipo' | 'cohorte'
+        let activeFilter = 'ALL';
+        let isUserInteracting = false;
+        let animationFrameId = null;
+        let rotationAngle = 0;
+
+        /**
+         * DATA LOADING & INITIALIZATION
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            // Prefer injected data (used when this HTML is embedded in Streamlit).
+            if (Array.isArray(window.__PCA_DATA__) && window.__PCA_DATA__.length > 0) {
+                rawData = window.__PCA_DATA__;
+                document.getElementById('loading').style.display = 'none';
+                updateSidebarStats(rawData);
+                buildPlot(true);
+                return;
+            }
+
+            Papa.parse("data/pca_data.csv", {
+                download: true,
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    rawData = results.data;
+                    document.getElementById('loading').style.display = 'none';
+                    updateSidebarStats(rawData);
+                    buildPlot(true);
+                },
+                error: function(err) {
+                    document.getElementById('loading').innerText = "Error al cargar data/pca_data.csv";
+                    console.error("Error parsing CSV:", err);
+                }
+            });
+        });
+
+        function updateSidebarStats(data) {
+            document.getElementById('stat-samples').innerText = data.length.toLocaleString();
+        }
+
+        /**
+         * PLOT BUILDING & TRACE GENERATION
+         */
+        function getGroupedTraces() {
+            const groups = {};
+
+            rawData.forEach(row => {
+                // Application of global dropdown filter
+                if (activeFilter !== 'ALL') {
+                    if (row.tipo !== activeFilter && row.cohorte !== activeFilter) {
+                        return;
+                    }
+                }
+
+                // Determinar el grupo según el modo seleccionado
+                let key = row.grupo;
+                if (activeColorMode === 'tipo') key = row.tipo;
+                if (activeColorMode === 'cohorte') key = row.cohorte;
+
+                if (!groups[key]) {
+                    groups[key] = {
+                        x: [], y: [], z: [],
+                        tipo: [], cohorte: [], grupo: [],
+                        key: key
+                    };
+                }
+                groups[key].x.push(row.PC1);
+                groups[key].y.push(row.PC2);
+                groups[key].z.push(row.PC3);
+                groups[key].tipo.push(row.tipo);
+                groups[key].cohorte.push(row.cohorte);
+                groups[key].grupo.push(row.grupo);
+            });
+
+            return Object.keys(groups).map(key => {
+                const g = groups[key];
+                const color = PALETTE[key] || '#64748B';
+
+                return {
+                    name: key,
+                    type: 'scatter3d',
+                    mode: 'markers',
+                    x: g.x,
+                    y: g.y,
+                    z: g.z,
+                    customdata: g.tipo.map((t, idx) => [t, g.cohorte[idx], g.grupo[idx]]),
+                    hovertemplate: 
+                        '<b>Grupo:</b> %{customdata[2]}<br>' +
+                        '<b>Tipo:</b> %{customdata[0]}<br>' +
+                        '<b>Cohorte:</b> %{customdata[1]}<br>' +
+                        '<b>PC1:</b> %{x:.3f}<br>' +
+                        '<b>PC2:</b> %{y:.3f}<br>' +
+                        '<b>PC3:</b> %{z:.3f}<extra></extra>',
+                    marker: {
+                        size: 4,
+                        color: color,
+                        opacity: 0.80,
+                        line: {
+                            color: '#FFFFFF',
+                            width: 0.5
+                        }
+                    }
+                };
+            });
+        }
+
+        function buildPlot(triggerIntro = false) {
+            const traces = getGroupedTraces();
+
+            const layout = {
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                margin: { l: 0, r: 0, b: 0, t: 0 },
+                showlegend: true,
+                legend: {
+                    x: 0,
+                    y: 1,
+                    font: { family: 'sans-serif', size: 11, color: '#334155' },
+                    bgcolor: 'rgba(255,255,255,0.4)'
+                },
+                scene: {
+                    xaxis: { title: 'PC1', backgroundcolor: 'rgba(0,0,0,0)', gridcolor: '#E2E8F0', showbackground: false },
+                    yaxis: { title: 'PC2', backgroundcolor: 'rgba(0,0,0,0)', gridcolor: '#E2E8F0', showbackground: false },
+                    zaxis: { title: 'PC3', backgroundcolor: 'rgba(0,0,0,0)', gridcolor: '#E2E8F0', showbackground: false },
+                    camera: {
+                        eye: { x: 1.25, y: 1.25, z: 1.25 }
+                    }
+                }
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['hoverClosest3d'],
+                displaylogo: false
+            };
+
+            Plotly.react('plotly-canvas', traces, layout, config).then(() => {
+                attachInteractionListeners();
+                if (triggerIntro) {
+                    setTimeout(() => {
+                        startCinematicRotation();
+                    }, 500);
+                }
+            });
+        }
+
+        /**
+         * INTERACTION & CONTROLS
+         */
+        function switchColorMode(mode) {
+            if (activeColorMode === mode) return;
+            activeColorMode = mode;
+
+            document.getElementById('btn-mode-grupo').classList.toggle('active', mode === 'grupo');
+            document.getElementById('btn-mode-tipo').classList.toggle('active', mode === 'tipo');
+            document.getElementById('btn-mode-cohorte').classList.toggle('active', mode === 'cohorte');
+
+            buildPlot(false);
+        }
+
+        function applyFilter(value) {
+            activeFilter = value;
+            buildPlot(false);
+        }
+
+        /**
+         * ROTATION & ANIMATION ENGINE
+         */
+        function attachInteractionListeners() {
+            const container = document.getElementById('plotly-canvas');
+            
+            const stopAutoRotation = () => {
+                isUserInteracting = true;
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+            };
+
+            container.addEventListener('mousedown', stopAutoRotation);
+            container.addEventListener('wheel', stopAutoRotation);
+            container.addEventListener('touchstart', stopAutoRotation);
+        }
+
+        function startCinematicRotation() {
+            const radius = 1.8;
+            const speed = 0.005;
+            const duration = 12000;
+            const startTime = performance.now();
+
+            function animate(currentTime) {
+                if (isUserInteracting) return;
+
+                const elapsed = currentTime - startTime;
+                rotationAngle += speed;
+
+                const eyeX = radius * Math.cos(rotationAngle);
+                const eyeY = radius * Math.sin(rotationAngle);
+
+                Plotly.relayout('plotly-canvas', {
+                    'scene.camera.eye': { x: eyeX, y: eyeY, z: 1.0 }
+                });
+
+                animationFrameId = requestAnimationFrame(animate);
+            }
+
+            animationFrameId = requestAnimationFrame(animate);
+        }
+    </script>
+</body>
+</html>
