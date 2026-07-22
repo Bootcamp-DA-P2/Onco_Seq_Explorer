@@ -5,10 +5,10 @@ from io import StringIO
 import pandas as pd
 import streamlit as st
 
+from components.cards import render_kpi_card, render_status_card
+from components.layout import render_page_header
 from streamlit_app.config import config
 from services.loaders import ArtifactLoader
-from streamlit_app.components.cards import render_kpi_card, render_status_card
-from streamlit_app.components.layout import render_page_header
 from utils.helpers import read_json_file
 
 

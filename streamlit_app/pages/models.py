@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from config import config
+from streamlit_app.config import config
 from services.loaders import ArtifactLoader
 from streamlit_app.components.charts import style_figure
 from streamlit_app.components.layout import render_page_header

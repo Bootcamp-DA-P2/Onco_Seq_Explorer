@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from config import config
+from streamlit_app.config import config
 
 
 def render_kpi_card(title: str, value: str, subtitle: str = "") -> None:

@@ -9,10 +9,10 @@ import streamlit.components.v1 as components
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
+from components.cards import render_kpi_card
+from components.charts import style_figure
+from components.layout import render_page_header
 from streamlit_app.config import config
-from streamlit_app.components.cards import render_kpi_card
-from streamlit_app.components.charts import style_figure
-from streamlit_app.components.layout import render_page_header
 from utils.helpers import read_csv_file, read_parquet_shape
 
 
@@ -236,7 +236,7 @@ def _render_tumor_pca_chart(selected_cohorts: list[str]) -> None:
 def _render_transcriptomic_html_preview() -> None:
     st.markdown("### Vista embebida: transcriptomic_space_explorer.html")
 
-    html_path = config.BASE_DIR / "streamlit_app" / "static" / "transcriptomic_space_explorer.html"
+    html_path = config.BASE_DIR / "transcriptomic_space_explorer.html"
     pca_csv_path = config.DATA_DIR / "pca_data.csv"
 
     if not html_path.exists():

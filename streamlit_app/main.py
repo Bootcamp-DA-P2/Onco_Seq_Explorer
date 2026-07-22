@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from config import config
+from streamlit_app.config import config
 from streamlit_app.components.layout import apply_theme
 from streamlit_app.components.sidebar import render_sidebar
 from streamlit_app.pages import dashboard, history, models, new_patient
