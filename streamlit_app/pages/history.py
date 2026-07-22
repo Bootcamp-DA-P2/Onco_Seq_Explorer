@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from database.cdss_database import CDSSDatabase
+from streamlit_app.database.cdss_database import CDSSDatabase
 from managers.feedback_manager import FeedbackManager
 from streamlit_app.components.cards import render_kpi_card, render_status_card
 from streamlit_app.components.layout import render_page_header

@@ -24,6 +24,12 @@ class CDSSDatabase:
                     patient_id TEXT PRIMARY KEY,
                     age INTEGER,
                     sex TEXT,
+                    nationality TEXT,
+                    weight_kg REAL,
+                    height_cm REAL,
+                    bmi REAL,
+                    bmi_classification TEXT,
+                    smoker_status TEXT,
                     cohort TEXT,
                     clinical_notes TEXT,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -84,6 +90,14 @@ class CDSSDatabase:
     def _migrate_schema(self, conn):
         cur = conn.cursor()
         migrations = {
+            "patients": [
+                ("nationality", "TEXT DEFAULT NULL"),
+                ("weight_kg", "REAL DEFAULT NULL"),
+                ("height_cm", "REAL DEFAULT NULL"),
+                ("bmi", "REAL DEFAULT NULL"),
+                ("bmi_classification", "TEXT DEFAULT NULL"),
+                ("smoker_status", "TEXT DEFAULT NULL"),
+            ],
             "predictions": [
                 ("is_tumor", "INTEGER DEFAULT 0"),
                 ("processed", "INTEGER DEFAULT 0"),
@@ -132,6 +146,53 @@ class CDSSDatabase:
             )
             conn.commit()
             return int(cur.lastrowid)
+
+    def save_or_update_patient(self, patient: Dict[str, Any]) -> None:
+        with self._get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO patients (
+                    patient_id,
+                    age,
+                    sex,
+                    nationality,
+                    weight_kg,
+                    height_cm,
+                    bmi,
+                    bmi_classification,
+                    smoker_status,
+                    cohort,
+                    clinical_notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(patient_id) DO UPDATE SET
+                    age = excluded.age,
+                    sex = excluded.sex,
+                    nationality = excluded.nationality,
+                    weight_kg = excluded.weight_kg,
+                    height_cm = excluded.height_cm,
+                    bmi = excluded.bmi,
+                    bmi_classification = excluded.bmi_classification,
+                    smoker_status = excluded.smoker_status,
+                    cohort = excluded.cohort,
+                    clinical_notes = excluded.clinical_notes,
+                    updated_at = CURRENT_TIMESTAMP
+                """,
+                (
+                    str(patient.get("patient_id", "")).strip(),
+                    patient.get("age"),
+                    patient.get("sex"),
+                    patient.get("nationality"),
+                    patient.get("weight_kg"),
+                    patient.get("height_cm"),
+                    patient.get("bmi"),
+                    patient.get("bmi_classification"),
+                    patient.get("smoker_status"),
+                    patient.get("cohort"),
+                    patient.get("clinical_notes"),
+                ),
+            )
+            conn.commit()
 
     def get_predictions(self, limit: int = 200) -> List[Dict[str, Any]]:
         with self._get_conn() as conn:

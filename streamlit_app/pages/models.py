@@ -12,32 +12,64 @@ from streamlit_app.components.tables import render_dataframe
 from utils.helpers import read_csv_file, read_json_file
 
 
+def _pick_metric(primary: dict, secondary: dict, keys: list[str], default: float = 0.0) -> float:
+    for source in (primary, secondary):
+        if not isinstance(source, dict):
+            continue
+        for key in keys:
+            value = source.get(key)
+            if value is None:
+                continue
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                continue
+    return float(default)
+
+
 def _load_top_genes_model1() -> pd.DataFrame:
-    data = read_json_file(config.OUTPUTS_DIR / "top_genes_modelo1.json")
-    if not isinstance(data, dict):
-        return pd.DataFrame()
-    try:
-        return pd.DataFrame(data)
-    except Exception:
-        return pd.DataFrame()
+    data = read_json_file(config.TOP_GENES_MODEL1_JSON_PATH)
+    if isinstance(data, dict):
+        try:
+            return pd.DataFrame(data)
+        except Exception:
+            pass
+
+    csv_df = read_csv_file(config.TOP_GENES_MODEL1_CSV_PATH)
+    return csv_df if csv_df is not None else pd.DataFrame()
 
 
 def _load_top_genes_model2() -> pd.DataFrame:
-    data = read_json_file(config.OUTPUTS_DIR / "top_genes_modelo2.json")
+    data = read_json_file(config.TOP_GENES_MODEL2_JSON_PATH)
     if isinstance(data, list):
         return pd.DataFrame(data)
-    return pd.DataFrame()
+
+    csv_df = read_csv_file(config.TOP_GENES_MODEL2_CSV_PATH)
+    return csv_df if csv_df is not None else pd.DataFrame()
 
 
 def _build_comparison_dataframe(metrics_1: dict, metrics_2: dict, metadata_1: dict, metadata_2: dict) -> pd.DataFrame:
+    metadata_1 = metadata_1 if isinstance(metadata_1, dict) else {}
+    metadata_2 = metadata_2 if isinstance(metadata_2, dict) else {}
+    metrics_1 = metrics_1 if isinstance(metrics_1, dict) else {}
+    metrics_2 = metrics_2 if isinstance(metrics_2, dict) else {}
+
+    if not metrics_1:
+        metrics_1 = metadata_1.get("metrics", {}) if isinstance(metadata_1.get("metrics"), dict) else {}
+    if not metrics_2:
+        metrics_2 = metadata_2.get("metrics", {}) if isinstance(metadata_2.get("metrics"), dict) else {}
+
+    metadata_metrics_1 = metadata_1.get("metrics", {}) if isinstance(metadata_1.get("metrics"), dict) else {}
+    metadata_metrics_2 = metadata_2.get("metrics", {}) if isinstance(metadata_2.get("metrics"), dict) else {}
+
     rows = [
         {
             "Modelo": "Modelo 1: Tumor vs Normal",
             "Problema": "Clasificacion binaria",
-            "Balanced Accuracy": float(metrics_1.get("balanced_accuracy", 0.0)),
-            "F1 Macro": float(metrics_1.get("f1_macro", 0.0)),
-            "ROC AUC": float(metrics_1.get("roc_auc", 0.0)),
-            "Kappa": float(metrics_1.get("kappa", 0.0)),
+            "Balanced Accuracy": _pick_metric(metrics_1, metadata_metrics_1, ["balanced_accuracy", "balancedAccuracy"]),
+            "F1 Macro": _pick_metric(metrics_1, metadata_metrics_1, ["f1_macro", "f1Macro", "f1"]),
+            "ROC AUC": _pick_metric(metrics_1, metadata_metrics_1, ["roc_auc", "rocAuc", "auc"]),
+            "Kappa": _pick_metric(metrics_1, metadata_metrics_1, ["kappa", "cohen_kappa"]),
             "CV F1 Macro": float(metadata_1.get("cv_f1_macro", 0.0)),
             "Genes seleccionados": int(metadata_1.get("selected_features", 0) or 0),
             "Algoritmo": str(metadata_1.get("algorithm", "N/D")),
@@ -45,10 +77,10 @@ def _build_comparison_dataframe(metrics_1: dict, metrics_2: dict, metadata_1: di
         {
             "Modelo": "Modelo 2: Subtipo tumoral",
             "Problema": "Clasificacion multiclase",
-            "Balanced Accuracy": float(metrics_2.get("balanced_accuracy", 0.0)),
-            "F1 Macro": float(metrics_2.get("f1_macro", 0.0)),
-            "ROC AUC": float(metrics_2.get("roc_auc_ovr", 0.0)),
-            "Kappa": float(metrics_2.get("kappa", 0.0)),
+            "Balanced Accuracy": _pick_metric(metrics_2, metadata_metrics_2, ["balanced_accuracy", "balancedAccuracy"]),
+            "F1 Macro": _pick_metric(metrics_2, metadata_metrics_2, ["f1_macro", "f1Macro", "f1_weighted", "f1"]),
+            "ROC AUC": _pick_metric(metrics_2, metadata_metrics_2, ["roc_auc_ovr", "roc_auc", "rocAuc", "auc"]),
+            "Kappa": _pick_metric(metrics_2, metadata_metrics_2, ["kappa", "cohen_kappa"]),
             "CV F1 Macro": float(metadata_2.get("cv_f1_macro", 0.0)),
             "Genes seleccionados": int(metadata_2.get("selected_features", 0) or 0),
             "Algoritmo": str(metadata_2.get("algorithm", "N/D")),
@@ -196,14 +228,14 @@ def render() -> None:
         col_a, col_b = st.columns(2)
         with col_a:
             _render_cv_panel(
-                config.OUTPUTS_DIR / "results_modelo_1_cv.csv",
+                config.CV_MODEL1_PATH,
                 "Modelo 1 - Tumor vs Normal",
                 "f1_macro_mean",
                 config.COLORS["primary"],
             )
         with col_b:
             _render_cv_panel(
-                config.OUTPUTS_DIR / "results_modelo_2_cv.csv",
+                config.CV_MODEL2_PATH,
                 "Modelo 2 - Subtipo tumoral",
                 "f1_macro_mean",
                 config.COLORS["secondary"],

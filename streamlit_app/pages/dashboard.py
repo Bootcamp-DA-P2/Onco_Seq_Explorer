@@ -17,7 +17,7 @@ from utils.helpers import read_csv_file, read_parquet_shape
 
 
 def _load_metadata() -> pd.DataFrame:
-    metadata_df = read_csv_file(config.DATA_DIR / "oncoseq_metadatos.csv")
+    metadata_df = read_csv_file(config.METADATA_CSV_PATH)
     if metadata_df is None:
         return pd.DataFrame()
 
@@ -143,7 +143,7 @@ def _compute_global_pca_projection() -> pd.DataFrame:
     if metadata_df.empty or "muestra_id" not in metadata_df.columns:
         return pd.DataFrame()
 
-    expression_df = pd.read_parquet(config.DATA_DIR / "oncoseq_expresion.parquet")
+    expression_df = pd.read_parquet(config.EXPRESSION_PARQUET_PATH)
 
     sample_ids = metadata_df["muestra_id"].astype(str)
     valid_ids = [sample_id for sample_id in sample_ids if sample_id in expression_df.index]
@@ -236,15 +236,15 @@ def _render_tumor_pca_chart(selected_cohorts: list[str]) -> None:
 def _render_transcriptomic_html_preview() -> None:
     st.markdown("### Vista embebida: transcriptomic_space_explorer.html")
 
-    html_path = config.BASE_DIR / "streamlit_app" / "static" / "transcriptomic_space_explorer.html"
-    pca_csv_path = config.DATA_DIR / "pca_data.csv"
+    html_path = config.PCA_HTML_PATH
+    pca_csv_path = config.PCA_DATA_CSV_PATH
 
     if not html_path.exists():
-        st.info("No se encontró transcriptomic_space_explorer.html en la raíz del proyecto.")
+        st.info("No se encontró transcriptomic_space_explorer.html en streamlit_app/pca.")
         return
 
     if not pca_csv_path.exists():
-        st.warning("No se encontró data/pca_data.csv. Por favor, genera el archivo PCA antes de previsualizar.")
+        st.warning("No se encontró pca_data.csv para la previsualización transcriptómica.")
         return
 
     # 1) Leer el HTML base y el CSV de PCA
@@ -272,10 +272,10 @@ def render() -> None:
     )
 
     metadata_df = _load_metadata()
-    expression_shape = read_parquet_shape(config.DATA_DIR / "oncoseq_expresion.parquet")
+    expression_shape = read_parquet_shape(config.EXPRESSION_PARQUET_PATH)
 
     if metadata_df.empty:
-        st.warning("No se pudo cargar data/oncoseq_metadatos.csv. Revisa la fuente de datos.")
+        st.warning("No se pudo cargar oncoseq_metadatos.csv. Revisa la ruta de datos en configuración.")
         return
 
     filtered_df, selected_cohorts, selected_tipos = _sidebar_filters(metadata_df)
