@@ -1,3 +1,3 @@
 """Backward-compatible config import for legacy modules."""
 
-from config import Config, config
+from streamlit_app.config import Config, config

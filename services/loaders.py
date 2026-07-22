@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 
 import joblib
 
-from config import config
+from streamlit_app.config import config
 from utils.helpers import read_json_file
 from utils.logger import get_logger
 

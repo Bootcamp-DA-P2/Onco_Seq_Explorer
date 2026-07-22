@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 
-from config import config
+from streamlit_app.config import config
 
 
 def get_connection() -> sqlite3.Connection:
