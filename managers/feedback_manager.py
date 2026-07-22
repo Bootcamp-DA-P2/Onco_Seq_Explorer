@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional
 
-from database.cdss_database import CDSSDatabase
+from streamlit_app.database.cdss_database import CDSSDatabase
 
 
 class FeedbackManager:

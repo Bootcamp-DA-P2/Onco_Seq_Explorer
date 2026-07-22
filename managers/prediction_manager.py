@@ -6,7 +6,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from database.cdss_database import CDSSDatabase
+from streamlit_app.database.cdss_database import CDSSDatabase
 from src.config import config
 
 
