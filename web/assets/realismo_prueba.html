@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Realismo · Piel a célula</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  :root{ --ink:#0A2A43; --blue:#2E6F9E; --cyan:#3DA9CB; --muted:#7690A3; --line:#D7E3EC; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:#F7FAFC; display:flex; align-items:center; justify-content:center; min-height:100vh; font-family:sans-serif; gap:24px; flex-wrap:wrap; padding:24px; }
+
+  .frame{
+    width:340px; height:340px;
+    background:#fff; border:1px solid var(--line); border-radius:6px;
+    position:relative; overflow:hidden;
+    box-shadow:0 16px 40px rgba(10,42,67,0.08);
+  }
+  .tag{
+    position:absolute; top:12px; left:12px; z-index:10;
+    font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--blue);
+    border:1px solid var(--cyan); background:rgba(61,169,203,0.08); padding:4px 8px;
+  }
+  .tag::before{ content:"◆ "; }
+  .layer{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+</style>
+</head>
+<body>
+
+<!-- SKIN -->
+<div class="frame">
+  <div class="tag">PIEL · TEXTURA REAL</div>
+  <div class="layer">
+    <svg viewBox="0 0 300 300" width="100%" height="100%">
+      <defs>
+        <filter id="skinNoise" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="4" seed="7" result="noise"/>
+          <feDiffuseLighting in="noise" lighting-color="#fff" surfaceScale="2.2" result="light">
+            <feDistantLight azimuth="235" elevation="55"/>
+          </feDiffuseLighting>
+          <feComposite in="light" in2="SourceGraphic" operator="arithmetic" k1="1" k2="0" k3="0" k4="0"/>
+        </filter>
+        <radialGradient id="skinTone" cx="35%" cy="30%" r="80%">
+          <stop offset="0%" stop-color="#F6DEC8"/>
+          <stop offset="60%" stop-color="#EFC9A9"/>
+          <stop offset="100%" stop-color="#DCA97F"/>
+        </radialGradient>
+        <filter id="poreNoise">
+          <feTurbulence type="turbulence" baseFrequency="0.15" numOctaves="2" seed="3"/>
+          <feColorMatrix type="matrix" values="0 0 0 0 0.55  0 0 0 0 0.38  0 0 0 0 0.25  0 0 0 0.12 0"/>
+        </filter>
+      </defs>
+      <rect width="300" height="300" fill="url(#skinTone)"/>
+      <rect width="300" height="300" filter="url(#skinNoise)" opacity="0.55" style="mix-blend-mode:multiply"/>
+      <rect width="300" height="300" filter="url(#poreNoise)"/>
+      <g stroke="#C99366" stroke-width="1" fill="none" opacity="0.35">
+        <path d="M0,45 Q150,60 300,40"/><path d="M0,100 Q150,118 300,95"/>
+        <path d="M0,160 Q150,142 300,165"/><path d="M0,220 Q150,238 300,215"/>
+        <path d="M0,270 Q150,255 300,272"/>
+      </g>
+      <ellipse cx="150" cy="150" rx="130" ry="130" fill="url(#skinTone)" opacity="0" />
+      <rect width="300" height="300" fill="black" opacity="0.06" style="mix-blend-mode:multiply"
+            fill-opacity="0"/>
+      <!-- vignette -->
+      <rect width="300" height="300" fill="url(#vignette)"/>
+      <radialGradient id="vignette" cx="50%" cy="45%" r="75%">
+        <stop offset="60%" stop-color="black" stop-opacity="0"/>
+        <stop offset="100%" stop-color="black" stop-opacity="0.22"/>
+      </radialGradient>
+    </svg>
+  </div>
+</div>
+
+<!-- TISSUE -->
+<div class="frame">
+  <div class="tag">TEJIDO · PROFUNDIDAD</div>
+  <div class="layer">
+    <svg viewBox="0 0 300 300" width="100%" height="100%">
+      <defs>
+        <radialGradient id="cellBody" cx="35%" cy="30%" r="75%">
+          <stop offset="0%" stop-color="#FBE3CE"/>
+          <stop offset="70%" stop-color="#F0C7A0"/>
+          <stop offset="100%" stop-color="#D69F72"/>
+        </radialGradient>
+        <radialGradient id="nucleusBody" cx="35%" cy="30%" r="75%">
+          <stop offset="0%" stop-color="#D89F70"/>
+          <stop offset="100%" stop-color="#A9713F"/>
+        </radialGradient>
+        <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#7A4F2A" flood-opacity="0.35"/>
+        </filter>
+      </defs>
+      <rect width="300" height="300" fill="#FCEEE0"/>
+      <g filter="url(#softShadow)">
+        <ellipse cx="70" cy="80" rx="44" ry="38" fill="url(#cellBody)" stroke="#C08A5A" stroke-width="1"/>
+        <ellipse cx="160" cy="58" rx="40" ry="42" fill="url(#cellBody)" stroke="#C08A5A" stroke-width="1"/>
+        <ellipse cx="232" cy="112" rx="42" ry="36" fill="url(#cellBody)" stroke="#C08A5A" stroke-width="1"/>
+        <ellipse cx="88" cy="172" rx="42" ry="40" fill="url(#cellBody)" stroke="#C08A5A" stroke-width="1"/>
+        <ellipse cx="192" cy="182" rx="46" ry="40" fill="url(#cellBody)" stroke="#C08A5A" stroke-width="1"/>
+        <ellipse cx="58" cy="252" rx="40" ry="36" fill="url(#cellBody)" stroke="#C08A5A" stroke-width="1"/>
+        <ellipse cx="182" cy="256" rx="42" ry="38" fill="url(#cellBody)" stroke="#C08A5A" stroke-width="1"/>
+      </g>
+      <g>
+        <circle cx="70" cy="80" r="9" fill="url(#nucleusBody)"/>
+        <circle cx="160" cy="58" r="8" fill="url(#nucleusBody)"/>
+        <circle cx="232" cy="112" r="9" fill="url(#nucleusBody)"/>
+        <circle cx="88" cy="172" r="8" fill="url(#nucleusBody)"/>
+        <circle cx="192" cy="182" r="9" fill="url(#nucleusBody)"/>
+        <circle cx="58" cy="252" r="8" fill="url(#nucleusBody)"/>
+        <circle cx="182" cy="256" r="9" fill="url(#nucleusBody)"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<!-- CELL -->
+<div class="frame">
+  <div class="tag">CÉLULA · VOLUMEN Y LUZ</div>
+  <div class="layer">
+    <svg viewBox="0 0 300 300" width="100%" height="100%">
+      <defs>
+        <radialGradient id="membrane" cx="38%" cy="32%" r="75%">
+          <stop offset="0%" stop-color="#F3FAFC"/>
+          <stop offset="55%" stop-color="#DCF0F5"/>
+          <stop offset="100%" stop-color="#AFD9E4"/>
+        </radialGradient>
+        <radialGradient id="cytoplasm" cx="40%" cy="35%" r="70%">
+          <stop offset="0%" stop-color="#E4F5F9"/>
+          <stop offset="100%" stop-color="#C4E4EC"/>
+        </radialGradient>
+        <radialGradient id="nucleusGrad" cx="38%" cy="30%" r="75%">
+          <stop offset="0%" stop-color="#8FCBDD"/>
+          <stop offset="70%" stop-color="#4E9DBB"/>
+          <stop offset="100%" stop-color="#2E6F9E"/>
+        </radialGradient>
+        <filter id="chromatinNoise">
+          <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="3" seed="12"/>
+          <feColorMatrix type="matrix" values="0 0 0 0 0.1  0 0 0 0 0.3  0 0 0 0 0.45  0 0 0 0.25 0"/>
+        </filter>
+        <filter id="cellShadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0A2A43" flood-opacity="0.18"/>
+        </filter>
+      </defs>
+      <rect width="300" height="300" fill="#FFFFFF"/>
+      <ellipse cx="150" cy="150" rx="128" ry="112" fill="url(#membrane)" filter="url(#cellShadow)"/>
+      <ellipse cx="150" cy="150" rx="118" ry="102" fill="url(#cytoplasm)"/>
+      <ellipse cx="105" cy="95" rx="20" ry="11" fill="#FFFFFF" opacity="0.5"/>
+      <ellipse cx="205" cy="195" rx="16" ry="9" fill="#FFFFFF" opacity="0.4"/>
+      <circle cx="150" cy="150" r="58" fill="url(#nucleusGrad)"/>
+      <circle cx="150" cy="150" r="58" fill="url(#nucleusGrad)" filter="url(#chromatinNoise)" opacity="0.5" style="mix-blend-mode:overlay"/>
+      <ellipse cx="130" cy="130" rx="16" ry="10" fill="#FFFFFF" opacity="0.25"/>
+    </svg>
+  </div>
+</div>
+
+</body>
+</html>
