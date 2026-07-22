@@ -1,54 +1,187 @@
 from __future__ import annotations
 
+import json
+
 import pandas as pd
 import streamlit as st
 
-from streamlit_app.database.cdss_database import CDSSDatabase
 from managers.feedback_manager import FeedbackManager
+from services.retraining import RetrainingService
 from streamlit_app.components.cards import render_kpi_card, render_status_card
 from streamlit_app.components.layout import render_page_header
-from streamlit_app.components.tables import render_dataframe
+from streamlit_app.database.cdss_database import CDSSDatabase
+
+
+VALID_DIAGNOSES = ["NORMAL", "BRCA", "COAD", "KIRC", "LUAD", "PRAD"]
+
+
+def _human_status(status: str) -> str:
+    if status == "CONFIRMADO":
+        return "Confirmado"
+    return "Pendiente de validacion"
+
+
+def _human_result(value: str | None) -> str:
+    if value == "CORRECTO":
+        return "✅ Correcto"
+    if value == "INCORRECTO":
+        return "❌ Incorrecto"
+    return "-"
+
+
+def _display_prediction(row: pd.Series) -> str:
+    stage1 = str(row.get("stage1_prediction", "")).upper()
+    stage2 = row.get("stage2_prediction")
+    if stage2:
+        return str(stage2).upper()
+    if stage1 in {"1", "TUMOR"}:
+        return "TUMOR"
+    return "NORMAL"
+
+
+def _prepare_table(dataframe: pd.DataFrame) -> pd.DataFrame:
+    if dataframe.empty:
+        return dataframe
+
+    view = pd.DataFrame()
+    view["ID del paciente"] = dataframe["patient_id"].fillna("N/D")
+    view["Fecha del analisis"] = dataframe["timestamp"].fillna("")
+    view["Prediccion IA"] = dataframe.apply(_display_prediction, axis=1)
+    view["Diagnostico confirmado"] = dataframe["confirmed_diagnosis"].fillna("")
+    view["Estado"] = dataframe["case_status"].fillna("PENDIENTE_VALIDACION").apply(_human_status)
+    view["Resultado"] = dataframe["comparison_result"].apply(_human_result)
+    view["Acciones"] = dataframe["case_status"].apply(lambda s: "Confirmar diagnostico" if s != "CONFIRMADO" else "Caso confirmado")
+    view["prediction_id"] = dataframe["id"]
+    return view
+
+
+def _render_confirmation_forms(dataframe: pd.DataFrame) -> None:
+    pending = dataframe[dataframe["case_status"] != "CONFIRMADO"]
+    if pending.empty:
+        st.info("No hay casos pendientes de validacion clinica.")
+        return
+
+    manager = FeedbackManager()
+
+    for _, row in pending.iterrows():
+        case_id = int(row["id"])
+        patient_id = str(row.get("patient_id") or "N/D")
+        predicted = _display_prediction(row)
+
+        with st.expander(f"Confirmar diagnostico | Caso #{case_id} | Paciente: {patient_id}"):
+            st.write(f"Prediccion IA registrada: **{predicted}**")
+            diagnosis = st.selectbox(
+                "Diagnostico definitivo",
+                options=VALID_DIAGNOSES,
+                key=f"diagnosis_{case_id}",
+            )
+            notes = st.text_area("Notas de validacion", key=f"notes_{case_id}")
+
+            if st.button("Guardar validacion", key=f"save_validation_{case_id}", type="primary"):
+                result = manager.submit_feedback(
+                    prediction_id=case_id,
+                    confirmed_diagnosis=diagnosis,
+                    clinical_notes=notes,
+                )
+                if result.get("ok"):
+                    readable = "✅ Correcto" if result.get("is_correct") else "❌ Incorrecto"
+                    render_status_card(
+                        "Validacion guardada",
+                        f"Prediccion IA: {result.get('prediction')} | Diagnostico confirmado: {result.get('confirmed')} | Resultado: {readable}",
+                        "ok",
+                    )
+                    st.rerun()
+                else:
+                    render_status_card("No se pudo guardar", "No se encontro el caso seleccionado.", "warning")
+
+
+def _render_retraining_panel(database: CDSSDatabase) -> None:
+    st.markdown("### Preparacion para reentrenamiento")
+    eligible_cases = database.get_confirmed_retraining_cases()
+
+    col_a, col_b = st.columns(2)
+    with col_a:
+        render_kpi_card("Casos aptos para reentrenamiento", str(len(eligible_cases)), "Confirmados y con muestra")
+    with col_b:
+        if st.button("Ejecutar reentrenamiento manual", type="secondary", use_container_width=True):
+            service = RetrainingService()
+            result = service.run_manual_retraining()
+            if result.get("ok"):
+                render_status_card(
+                    "Nueva version generada",
+                    f"Version {result.get('version_id')} creada con {result.get('source_cases')} casos confirmados.",
+                    "ok",
+                )
+            else:
+                render_status_card("Reentrenamiento no ejecutado", result.get("message", "No fue posible ejecutar el proceso."), "warning")
+
+    versions = database.get_model_versions(limit=10)
+    if versions:
+        rows = []
+        for version in versions:
+            metrics_json = version.get("metrics_json")
+            metrics = {}
+            if metrics_json:
+                try:
+                    metrics = json.loads(metrics_json)
+                except Exception:
+                    metrics = {}
+            rows.append(
+                {
+                    "Version": version.get("version_id"),
+                    "Fecha": version.get("created_at"),
+                    "Casos": version.get("source_cases"),
+                    "F1 Macro M1": (metrics.get("model1") or {}).get("f1_macro"),
+                    "F1 Macro M2": (metrics.get("model2") or {}).get("f1_macro"),
+                }
+            )
+        st.markdown("#### Historial de versiones")
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
 
 def render() -> None:
-	render_page_header("Histórico", "Persistencia y seguimiento clínico")
-	database = CDSSDatabase()
-	rows = database.get_predictions(limit=500)
-	dataframe = pd.DataFrame(rows)
+    render_page_header(
+        "Historico",
+        "Validacion clinica posterior de predicciones IA y preparacion de mejora continua.",
+    )
 
-	kpi_cols = st.columns(3)
-	with kpi_cols[0]:
-		render_kpi_card("Predicciones registradas", str(len(dataframe)), "Histórico disponible")
-	with kpi_cols[1]:
-		tumor_count = int((dataframe["is_tumor"] == 1).sum()) if not dataframe.empty and "is_tumor" in dataframe.columns else 0
-		render_kpi_card("Casos tumorales", str(tumor_count), "Modelo 1")
-	with kpi_cols[2]:
-		normal_count = max(len(dataframe) - tumor_count, 0)
-		render_kpi_card("Casos normales", str(normal_count), "Modelo 1")
+    database = CDSSDatabase()
+    rows = database.get_predictions(limit=1000)
+    dataframe = pd.DataFrame(rows)
 
-	st.markdown("### Registro histórico")
-	render_dataframe(dataframe, "Todavía no hay predicciones almacenadas en la base de datos.")
+    if dataframe.empty:
+        render_status_card("Sin casos", "Aun no hay casos analizados en el sistema.", "warning")
+        return
 
-	st.markdown("### Confirmación diagnóstica")
-	if dataframe.empty:
-		st.info("Cuando existan predicciones guardadas, aquí podrás registrar el diagnóstico confirmado y el feedback clínico.")
-		return
+    total = len(dataframe)
+    confirmed = int((dataframe["case_status"] == "CONFIRMADO").sum())
+    pending = max(total - confirmed, 0)
 
-	prediction_id = st.selectbox("Prediction ID", options=dataframe["id"].tolist())
-	confirmed = st.text_input("Diagnóstico confirmado")
-	notes = st.text_area("Notas del clínico")
-	correct = st.selectbox("¿Coincide con la predicción?", ["No definido", "Sí", "No"], index=0)
+    kpi_cols = st.columns(3)
+    with kpi_cols[0]:
+        render_kpi_card("Casos analizados", str(total), "Predicciones IA registradas")
+    with kpi_cols[1]:
+        render_kpi_card("Pendientes de validacion", str(pending), "Revision clinica")
+    with kpi_cols[2]:
+        render_kpi_card("Confirmados", str(confirmed), "Con diagnostico definitivo")
 
-	if st.button("Guardar feedback clínico", type="primary"):
-		if not confirmed.strip():
-			render_status_card("Dato requerido", "Debes indicar el diagnóstico confirmado antes de guardar.", "warning")
-			return
-		manager = FeedbackManager()
-		is_correct = None if correct == "No definido" else (correct == "Sí")
-		feedback_id = manager.submit_feedback(
-			prediction_id=int(prediction_id),
-			confirmed_diagnosis=confirmed.strip(),
-			clinical_notes=notes,
-			is_correct=is_correct,
-		)
-		render_status_card("Feedback guardado", f"Registro clínico almacenado con ID {feedback_id}", "ok")
+    st.markdown("### Tabla principal")
+    table_df = _prepare_table(dataframe)
+    st.dataframe(
+        table_df[[
+            "ID del paciente",
+            "Fecha del analisis",
+            "Prediccion IA",
+            "Diagnostico confirmado",
+            "Estado",
+            "Resultado",
+            "Acciones",
+        ]],
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    st.markdown("### Validacion clinica")
+    _render_confirmation_forms(dataframe)
+
+    _render_retraining_panel(database)

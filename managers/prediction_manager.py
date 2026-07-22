@@ -6,8 +6,8 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from database.cdss_database import CDSSDatabase
 from src.config import config
+from streamlit_app.database.cdss_database import CDSSDatabase
 
 
 class PredictionManager:
@@ -21,8 +21,8 @@ class PredictionManager:
         path = Path(config.MODELS_DIR) / "feature_names.json"
         if not path.exists():
             return []
-        with path.open("r", encoding="utf-8") as f:
-            return json.load(f)
+        with path.open("r", encoding="utf-8") as file_handle:
+            return json.load(file_handle)
 
     def _load_models_if_needed(self):
         if self.model1 is None:
@@ -33,23 +33,27 @@ class PredictionManager:
     def _to_wide_row(self, df: pd.DataFrame) -> pd.DataFrame:
         cols = {c.lower(): c for c in df.columns}
         if "gene" in cols and "expression" in cols:
-            g = cols["gene"]
-            e = cols["expression"]
-            row = {str(r[g]): float(r[e]) for _, r in df.iterrows()}
+            gene_col = cols["gene"]
+            expr_col = cols["expression"]
+            row = {str(r[gene_col]): float(r[expr_col]) for _, r in df.iterrows()}
             return pd.DataFrame([row])
         return df.iloc[[0]].copy()
 
     def preprocess_sample(self, sample_df: pd.DataFrame) -> pd.DataFrame:
         wide = self._to_wide_row(sample_df)
         if self.feature_names:
-            for feat in self.feature_names:
-                if feat not in wide.columns:
-                    wide[feat] = 0.0
-            wide = wide[self.feature_names]
+            wide = wide.reindex(columns=self.feature_names, fill_value=0.0).copy()
         wide = wide.apply(pd.to_numeric, errors="coerce").fillna(0.0)
         return wide
 
-    def run_prediction(self, sample_df: pd.DataFrame, sample_name: str, user_notes: str = "") -> Dict[str, Any]:
+    def run_prediction(
+        self,
+        sample_df: pd.DataFrame,
+        sample_name: str,
+        user_notes: str = "",
+        patient_context: Dict[str, Any] | None = None,
+        validation_summary: Dict[str, Any] | None = None,
+    ) -> Dict[str, Any]:
         self._load_models_if_needed()
         x = self.preprocess_sample(sample_df)
 
@@ -75,8 +79,22 @@ class PredictionManager:
         final_prediction = stage2_label if stage2_label else ("NORMAL" if not is_tumor else "TUMOR")
         confidence = "HIGH" if p1 >= 0.8 else ("MEDIUM" if p1 >= 0.6 else "LOW")
 
+        context = patient_context or {}
         payload = {
+            "patient_id": context.get("patient_id"),
+            "first_name": context.get("first_name"),
+            "last_name": context.get("last_name"),
+            "age": context.get("age"),
+            "sex": context.get("sex"),
+            "nationality": context.get("nationality"),
+            "weight_kg": context.get("weight_kg"),
+            "height_cm": context.get("height_cm"),
+            "bmi": context.get("bmi"),
+            "bmi_classification": context.get("bmi_classification"),
+            "smoker_status": context.get("smoker_status"),
             "sample_name": sample_name,
+            "sample_values_json": json.dumps(x.iloc[0].to_dict()),
+            "validation_summary_json": json.dumps(validation_summary or {}),
             "stage1_prediction": stage1_label,
             "stage1_probability": p1,
             "stage2_prediction": stage2_label,
@@ -89,6 +107,8 @@ class PredictionManager:
             "is_tumor": is_tumor,
             "model2_probabilities_json": probs2_json,
         }
+
         prediction_id = self.db.save_prediction(payload)
         payload["prediction_id"] = prediction_id
+        payload["model2_probabilities"] = json.loads(probs2_json) if probs2_json else {}
         return payload
