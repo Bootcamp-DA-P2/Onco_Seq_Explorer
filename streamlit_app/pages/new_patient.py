@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from datetime import datetime
 from io import BytesIO
+from urllib.parse import quote
 from typing import Any, Dict, Tuple
 
 import pandas as pd
@@ -9,11 +11,79 @@ import streamlit as st
 
 from managers.prediction_manager import PredictionManager
 from services.report_generator import ClinicalReport, ReportGeneratorService
-from streamlit_app.components.cards import render_kpi_card, render_status_card
+from streamlit_app.components.cards import render_status_card
 from streamlit_app.components.layout import render_page_header
 from streamlit_app.config import config
 from streamlit_app.database.cdss_database import CDSSDatabase
 from utils.helpers import read_json_file
+
+
+def _inject_page_style() -> None:
+    st.markdown(
+        """
+        <style>
+            .np-shell {
+                background: radial-gradient(circle at 10% 0%, #eef6ff 0%, transparent 42%),
+                            radial-gradient(circle at 95% 10%, #f2f9ff 0%, transparent 35%),
+                            #f7fafc;
+                border: 1px solid #dbe7f3;
+                border-radius: 18px;
+                padding: 16px;
+                margin-bottom: 14px;
+            }
+            .np-card {
+                background: #ffffff;
+                border: 1px solid #dde7f2;
+                border-radius: 14px;
+                padding: 14px;
+                margin-bottom: 12px;
+                box-shadow: 0 10px 24px rgba(14, 28, 45, 0.04);
+            }
+            .np-title {
+                margin: 0 0 8px 0;
+                font-size: 15px;
+                color: #0f3759;
+                font-weight: 700;
+            }
+            .np-step {
+                display:inline-flex;
+                align-items:center;
+                gap:8px;
+                background:#edf6ff;
+                color:#11406a;
+                border:1px solid #cfe1f4;
+                border-radius:999px;
+                padding:4px 10px;
+                font-size:11px;
+                font-weight:600;
+                text-transform:uppercase;
+                letter-spacing:0.4px;
+                margin-bottom:8px;
+            }
+            .np-kpi {
+                background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+                border:1px solid #d8e8f8;
+                border-radius:14px;
+                padding:14px;
+            }
+            .np-kpi-label {
+                font-size:11px;
+                color:#516174;
+                margin-bottom:5px;
+                text-transform:uppercase;
+                letter-spacing:0.45px;
+            }
+            .np-kpi-value {
+                font-size:30px;
+                font-weight:700;
+                color:#0c3d66;
+                line-height:1.1;
+            }
+            .np-kpi-sub { font-size:12px; color:#475569; margin-top:4px; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def _calculate_bmi(weight_kg: float, height_cm: float) -> tuple[float | None, str]:
@@ -35,18 +105,23 @@ def _normalize_gene_name(value: Any) -> str:
     return str(value).strip()
 
 
+def _format_pct(probability: float | None) -> str:
+    value = float(probability or 0.0) * 100
+    return f"{value:.1f}%"
+
+
 def _build_excel_template(feature_names: list[str]) -> bytes:
     instructions = pd.DataFrame(
         {
             "Instrucciones": [
-                "1) Rellena la hoja Muestra en formato vertical: columnas gene y expression.",
-                "2) No modifiques los nombres de columnas ni borres genes de la plantilla.",
-                "3) Completa la columna expression con valores numericos.",
-                "4) Si dejas celdas vacias, se imputaran como 0.0 para mantener compatibilidad.",
-                "5) Guarda el archivo en formato .xlsx antes de subirlo.",
+                "1) Completa la hoja Muestra en formato vertical (gene, expression).",
+                "2) No cambies nombres de columnas ni elimines genes.",
+                "3) Introduce valores numericos en expression.",
+                "4) Celdas vacias se imputaran como 0.0 para compatibilidad.",
             ]
         }
     )
+
     sample_df = pd.DataFrame(
         {
             "gene": feature_names,
@@ -88,9 +163,6 @@ def _validate_uploaded_sample(uploaded_file, feature_names: list[str]) -> Tuple[
     df.columns = [_normalize_gene_name(col) for col in df.columns]
     feature_names = [_normalize_gene_name(gene) for gene in feature_names]
 
-    # Support both formats:
-    # - vertical template: columns [gene, expression]
-    # - horizontal legacy: genes as columns in first row
     sample_row: pd.DataFrame
     if {"gene", "expression"}.issubset(set(c.lower() for c in df.columns)):
         cols = {c.lower(): c for c in df.columns}
@@ -147,7 +219,7 @@ def _validate_uploaded_sample(uploaded_file, feature_names: list[str]) -> Tuple[
     summary["message"] = (
         "Muestra valida y lista para analisis."
         if is_valid
-        else "Muestra validada con ajustes automaticos. Revisa el resumen antes de analizar."
+        else "Muestra validada con ajustes automaticos."
     )
     return numeric, summary
 
@@ -183,49 +255,92 @@ def _build_patient_payload(
     }
 
 
-def _render_report_results(report: ClinicalReport, prediction_payload: Dict[str, Any]) -> None:
-    st.markdown("### Paso 4. Resultado del modelo")
-    col_a, col_b, col_c = st.columns(3)
+def _build_storage_context(patient_payload: Dict[str, Any], consent: bool) -> Dict[str, Any]:
+    if consent:
+        return patient_payload
 
-    model1_label = str(prediction_payload.get("stage1_prediction", "")).upper()
-    model1_normal_tumoral = "Tumoral" if prediction_payload.get("is_tumor") else "Normal"
-    model1_probability = float(prediction_payload.get("stage1_probability", 0.0))
+    return {
+        "patient_id": f"ANON-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+        "first_name": None,
+        "last_name": None,
+        "age": None,
+        "sex": None,
+        "nationality": None,
+        "weight_kg": None,
+        "height_cm": None,
+        "bmi": None,
+        "bmi_classification": None,
+        "smoker_status": None,
+        "cohort": None,
+        "clinical_notes": None,
+    }
 
-    col_a.metric("Clase predicha (Modelo 1)", model1_label or "N/D")
-    col_b.metric("Normal / Tumoral", model1_normal_tumoral)
-    col_c.metric("Probabilidad Modelo 1", f"{model1_probability:.4f}")
 
-    if prediction_payload.get("is_tumor"):
-        st.markdown("#### Resultado Modelo 2")
-        probs_map = prediction_payload.get("model2_probabilities", {}) or {}
-        st.write(f"Tipo de cancer estimado: **{prediction_payload.get('stage2_prediction', 'N/D')}**")
-        st.write(f"Probabilidad: **{float(prediction_payload.get('stage2_probability') or 0.0):.4f}**")
+def _render_primary_results(prediction_payload: Dict[str, Any]) -> None:
+    st.markdown('<div class="np-card"><div class="np-step">Resultado principal</div><h3 class="np-title">Prediccion clinica IA</h3>', unsafe_allow_html=True)
 
-        if probs_map:
-            probs_df = pd.DataFrame(
-                [{"Clase": k, "Probabilidad": v} for k, v in probs_map.items()]
-            ).sort_values(by="Probabilidad", ascending=False)
-            st.dataframe(probs_df, use_container_width=True, hide_index=True)
+    model1_text = "Tumoral" if prediction_payload.get("is_tumor") else "Normal"
+    cancer_type = prediction_payload.get("stage2_prediction") if prediction_payload.get("is_tumor") else "No aplica"
+    probability = prediction_payload.get("stage2_probability") if prediction_payload.get("is_tumor") else prediction_payload.get("stage1_probability")
 
-            fig = px.bar(
-                probs_df.sort_values(by="Probabilidad", ascending=True),
-                x="Probabilidad",
-                y="Clase",
-                orientation="h",
-                color="Probabilidad",
-                color_continuous_scale=["#DBEAFE", "#1068DA"],
-            )
-            fig.update_layout(title="Distribucion de probabilidades - Modelo 2", showlegend=False)
-            st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.info("Modelo 2 no se ejecuta para muestras clasificadas como Normal en Modelo 1.")
+    c1, c2, c3 = st.columns(3)
+    c1.markdown(
+        f'<div class="np-kpi"><div class="np-kpi-label">Clasificacion inicial</div><div class="np-kpi-value">{model1_text}</div><div class="np-kpi-sub">Modelo 1 (Normal vs Tumoral)</div></div>',
+        unsafe_allow_html=True,
+    )
+    c2.markdown(
+        f'<div class="np-kpi"><div class="np-kpi-label">Tipo de cancer estimado</div><div class="np-kpi-value">{cancer_type}</div><div class="np-kpi-sub">Resultado clinico principal</div></div>',
+        unsafe_allow_html=True,
+    )
+    c3.markdown(
+        f'<div class="np-kpi"><div class="np-kpi-label">Probabilidad</div><div class="np-kpi-value">{_format_pct(probability)}</div><div class="np-kpi-sub">Confianza del resultado</div></div>',
+        unsafe_allow_html=True,
+    )
 
-    st.markdown("### Paso 5. Informe de resultados")
-    report_service = ReportGeneratorService()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+def _render_advanced_analysis(prediction_payload: Dict[str, Any]) -> None:
+    st.markdown("### Detalles IA")
+    st.caption("Vista técnica para análisis de comportamiento del modelo. Esta información no forma parte del flujo clínico principal.")
+
+    probabilities = prediction_payload.get("model2_probabilities", {}) or {}
+    if not probabilities:
+        st.info("No hay distribucion de probabilidades multiclase para este caso.")
+        return
+
+    probs_df = pd.DataFrame(
+        [{"Clase": cls, "Probabilidad": float(prob)} for cls, prob in probabilities.items()]
+    ).sort_values(by="Probabilidad", ascending=False)
+    probs_df["Probabilidad (%)"] = probs_df["Probabilidad"].map(lambda val: round(val * 100, 2))
+
+    st.dataframe(probs_df[["Clase", "Probabilidad (%)"]], width="stretch", hide_index=True)
+
+    fig = px.bar(
+        probs_df.sort_values(by="Probabilidad", ascending=True),
+        x="Probabilidad",
+        y="Clase",
+        orientation="h",
+        color="Probabilidad",
+        color_continuous_scale=["#e2e8f0", "#1068DA"],
+    )
+    fig.update_layout(title="Distribucion de probabilidades", showlegend=False)
+    st.plotly_chart(fig, width="stretch")
+
+    st.markdown("### Explicacion del modelo")
+    top_class = probs_df.iloc[0]["Clase"] if not probs_df.empty else "N/D"
+    top_prob = probs_df.iloc[0]["Probabilidad (%)"] if not probs_df.empty else 0
+    st.info(
+        f"La prediccion final se asigna a la clase con mayor probabilidad posterior. "
+        f"En este caso, la clase dominante es {top_class} con {top_prob:.2f}%."
+    )
+
+
+def _render_report(report: ClinicalReport, report_service: ReportGeneratorService) -> None:
+    st.markdown("### Informe clinico")
     html = report_service.render_html_report(report)
-    st.markdown(html, unsafe_allow_html=True)
 
-    pdf_bytes = report_service.build_pdf_from_report(report)
+    pdf_bytes = report_service.build_pdf_from_html(html)
     if pdf_bytes is not None:
         st.download_button(
             label="Descargar informe PDF",
@@ -233,16 +348,23 @@ def _render_report_results(report: ClinicalReport, prediction_payload: Dict[str,
             file_name=f"informe_resultados_{report.patient.get('patient_id', 'paciente')}.pdf",
             mime="application/pdf",
         )
+    else:
+        st.info("No fue posible generar el PDF en este entorno. El informe HTML permanece disponible.")
+
+    html_data_url = "data:text/html;charset=utf-8," + quote(html)
+    st.iframe(html_data_url, height=980)
 
 
 def render() -> None:
+    _inject_page_style()
     render_page_header(
         "Nuevo Paciente",
-        "Asistente guiado para validacion de muestra RNA-Seq y prediccion IA (no diagnostico confirmado).",
+        "Registro clinico, validacion de muestra y prediccion IA en una sola vista.",
     )
 
     db = CDSSDatabase()
     prediction_manager = PredictionManager()
+    report_service = ReportGeneratorService()
 
     feature_names = read_json_file(config.FEATURE_NAMES_PATH)
     if not isinstance(feature_names, list) or not feature_names:
@@ -258,11 +380,21 @@ def render() -> None:
     if "new_patient_report" not in st.session_state:
         st.session_state.new_patient_report = None
 
-    st.markdown("### Paso 1. Informacion clinica")
+    if st.button("Nueva evaluacion", width="content"):
+        st.session_state.new_patient_validated_df = None
+        st.session_state.new_patient_validation_summary = {}
+        st.session_state.new_patient_prediction = None
+        st.session_state.new_patient_report = None
+        st.rerun()
+
+    st.markdown('<div class="np-shell">', unsafe_allow_html=True)
+
+    st.markdown('<div class="np-card"><div class="np-step">Paso 1</div><h3 class="np-title">Datos del paciente</h3>', unsafe_allow_html=True)
+
     p1, p2, p3 = st.columns(3)
     patient_id = p1.text_input("ID del paciente")
-    first_name = p2.text_input("Nombre (opcional)")
-    last_name = p3.text_input("Apellidos (opcional)")
+    first_name = p2.text_input("Nombre")
+    last_name = p3.text_input("Apellidos")
 
     p4, p5, p6 = st.columns(3)
     age = p4.number_input("Edad", min_value=0, max_value=120, value=50)
@@ -277,13 +409,19 @@ def render() -> None:
     p10.text_input("Clasificacion IMC", value=bmi_classification, disabled=True)
 
     smoker_status = st.selectbox("Estado de fumador", ["No fumador", "Fumador", "Exfumador"], index=0)
-    clinical_notes = st.text_area("Observaciones clinicas")
+    clinical_notes = st.text_area("Observaciones clinicas", height=80)
 
-    st.markdown("### Paso 2. Plantilla y carga de muestra RNA-Seq")
-    col_template, col_upload = st.columns(2)
+    consent = st.checkbox(
+        "Autorizo el almacenamiento anonimizado de mis datos clinicos y resultados para fines de investigacion y mejora del sistema de IA.",
+        value=False,
+    )
 
-    with col_template:
-        st.markdown("#### Descargar plantilla Excel")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="np-card"><div class="np-step">Paso 2</div><h3 class="np-title">Muestra RNA-Seq</h3>', unsafe_allow_html=True)
+
+    c1, c2 = st.columns([1, 1])
+    with c1:
         template_xlsx = _build_excel_template(feature_names)
         st.download_button(
             label="Descargar plantilla Excel",
@@ -292,35 +430,37 @@ def render() -> None:
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 
-    with col_upload:
-        st.markdown("#### Subir muestra RNA-Seq")
-        upload = st.file_uploader("Subir plantilla completada", type=["xlsx"])
-        if upload is not None:
-            validated_df, validation_summary = _validate_uploaded_sample(upload, feature_names)
-            st.session_state.new_patient_validated_df = validated_df
-            st.session_state.new_patient_validation_summary = validation_summary
+    with c2:
+        upload = st.file_uploader("Subir muestra RNA-Seq (.xlsx)", type=["xlsx"])
 
-            v1, v2, v3 = st.columns(3)
-            v1.metric("Genes encontrados", str(validation_summary.get("genes_found", 0)))
-            v2.metric("Genes faltantes", str(validation_summary.get("missing_count", 0)))
-            v3.metric("Genes adicionales", str(validation_summary.get("extra_count", 0)))
+    if upload is not None:
+        validated_df, validation_summary = _validate_uploaded_sample(upload, feature_names)
+        st.session_state.new_patient_validated_df = validated_df
+        st.session_state.new_patient_validation_summary = validation_summary
 
-            v4, v5 = st.columns(2)
-            v4.metric("Valores no numericos", str(validation_summary.get("non_numeric_count", 0)))
-            v5.metric("Valores nulos", str(validation_summary.get("null_count", 0)))
+        if validation_summary.get("status") in {"VALIDA", "VALIDA_CON_AJUSTES"}:
+            render_status_card("Muestra procesada", validation_summary.get("message", ""), "ok")
+        else:
+            render_status_card("Muestra no valida", validation_summary.get("message", ""), "warning")
 
-            status_kind = "ok" if validation_summary.get("status") == "VALIDA" else "warning"
-            render_status_card("Estado de validacion", validation_summary.get("message", ""), status_kind)
-
+        with st.expander("Ver detalles de la validacion"):
+            st.write(f"Genes encontrados: {validation_summary.get('genes_found', 0)}")
+            st.write(f"Genes faltantes: {validation_summary.get('missing_count', 0)}")
+            st.write(f"Genes adicionales: {validation_summary.get('extra_count', 0)}")
+            st.write(f"Valores no numericos: {validation_summary.get('non_numeric_count', 0)}")
+            st.write(f"Valores nulos: {validation_summary.get('null_count', 0)}")
             missing_genes = validation_summary.get("missing_genes", [])
             extra_genes = validation_summary.get("extra_genes", [])
             if missing_genes:
-                st.caption("Genes faltantes (muestra): " + ", ".join(missing_genes))
+                st.caption("Genes faltantes: " + ", ".join(missing_genes))
             if extra_genes:
-                st.caption("Genes adicionales (muestra): " + ", ".join(extra_genes))
+                st.caption("Genes adicionales: " + ", ".join(extra_genes))
 
-    st.markdown("### Paso 3. Ejecutar analisis")
-    analyze_clicked = st.button("Analizar muestra", type="primary", use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="np-card"><div class="np-step">Paso 3</div><h3 class="np-title">Ejecutar prediccion</h3>', unsafe_allow_html=True)
+    analyze_clicked = st.button("Analizar muestra", type="primary", width="stretch")
+    st.markdown('</div>', unsafe_allow_html=True)
 
     if analyze_clicked:
         if not patient_id.strip():
@@ -331,7 +471,7 @@ def render() -> None:
         validation_summary = st.session_state.new_patient_validation_summary or {}
 
         if validated_df is None or validated_df.empty:
-            render_status_card("Muestra no valida", "Primero debes cargar y validar una muestra RNA-Seq.", "warning")
+            render_status_card("Muestra no valida", "Sube y valida una muestra antes de analizar.", "warning")
             return
 
         patient_payload = _build_patient_payload(
@@ -348,16 +488,19 @@ def render() -> None:
             smoker_status=smoker_status,
             clinical_notes=clinical_notes,
         )
-        db.save_or_update_patient(patient_payload)
 
         progress = st.progress(0, text="Validando muestra")
         progress.progress(25, text="Ejecutando Modelo 1")
 
+        storage_context = _build_storage_context(patient_payload, consent=consent)
+        if consent:
+            db.save_or_update_patient(patient_payload)
+
         prediction_payload = prediction_manager.run_prediction(
             sample_df=validated_df,
             sample_name=f"sample_{patient_id.strip()}",
-            user_notes=clinical_notes,
-            patient_context=patient_payload,
+            user_notes=clinical_notes if consent else "",
+            patient_context=storage_context,
             validation_summary=validation_summary,
         )
 
@@ -367,18 +510,17 @@ def render() -> None:
         model1_result = {
             "predicted_label": str(prediction_payload.get("stage1_prediction", "")).upper(),
             "normal_tumoral": "Tumoral" if prediction_payload.get("is_tumor") else "Normal",
-            "probability": f"{float(prediction_payload.get('stage1_probability', 0.0)):.4f}",
+            "probability": _format_pct(prediction_payload.get("stage1_probability")),
         }
         model2_result = {
             "predicted_cancer": prediction_payload.get("stage2_prediction") or "No aplica",
             "probability": (
-                f"{float(prediction_payload.get('stage2_probability') or 0.0):.4f}"
+                _format_pct(prediction_payload.get("stage2_probability"))
                 if prediction_payload.get("is_tumor")
                 else "No aplica"
             ),
         }
 
-        report_service = ReportGeneratorService()
         report = report_service.create_clinical_report(
             patient={
                 "patient_id": patient_payload["patient_id"],
@@ -404,24 +546,19 @@ def render() -> None:
 
         st.session_state.new_patient_prediction = prediction_payload
         st.session_state.new_patient_report = report
+
         progress.progress(100, text="Analisis completado")
-        render_status_card(
-            "Analisis completado",
-            "La prediccion IA ha sido registrada como Pendiente de validacion clinica en Historico.",
-            "ok",
-        )
+        if consent:
+            render_status_card("Analisis completado", "Prediccion registrada con consentimiento para investigacion.", "ok")
+        else:
+            render_status_card("Analisis completado", "Prediccion ejecutada sin almacenar datos personales.", "ok")
 
     if st.session_state.new_patient_prediction and st.session_state.new_patient_report:
-        _render_report_results(
-            report=st.session_state.new_patient_report,
-            prediction_payload=st.session_state.new_patient_prediction,
-        )
+        result_tab, advanced_tab = st.tabs(["Resultado clinico", "Analisis avanzado"])
+        with result_tab:
+            _render_primary_results(st.session_state.new_patient_prediction)
+            _render_report(st.session_state.new_patient_report, report_service)
+        with advanced_tab:
+            _render_advanced_analysis(st.session_state.new_patient_prediction)
 
-    stats = db.get_statistics()
-    k1, k2, k3 = st.columns(3)
-    with k1:
-        render_kpi_card("Casos registrados", str(stats.get("total_predictions", 0)), "Base de datos CDSS")
-    with k2:
-        render_kpi_card("Pendientes de validacion", str(stats.get("pending_cases", 0)), "Revision clinica")
-    with k3:
-        render_kpi_card("Casos confirmados", str(stats.get("confirmed_cases", 0)), "Validacion sanitaria")
+    st.markdown('</div>', unsafe_allow_html=True)

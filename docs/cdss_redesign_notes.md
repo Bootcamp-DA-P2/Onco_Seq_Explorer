@@ -1,74 +1,76 @@
 # CDSS Redesign Notes
 
-This document summarizes the redesign of Nuevo Paciente and Historico pages with clear CDSS role separation.
+# Rediseño del flujo clínico del CDSS
 
-## Objective
+Este documento resume el rediseño de las páginas **Nuevo Paciente** e **Histórico**, estableciendo una separación clara de responsabilidades dentro del Sistema de Soporte a la Decisión Clínica (CDSS).
 
-- Nuevo Paciente handles AI prediction workflow only.
-- Historico handles clinical validation and post-analysis lifecycle.
-- AI prediction is never treated as confirmed medical diagnosis.
+## Objetivo
 
-## Responsibilities by Module
+- **Nuevo Paciente** gestiona exclusivamente el flujo de predicción mediante Inteligencia Artificial.
+- **Histórico** gestiona la validación clínica y todo el ciclo de vida posterior al análisis.
+- La predicción generada por la IA **nunca se considera un diagnóstico médico confirmado**.
 
-### Inference and Case Registration
+## Responsabilidades por módulo
+
+### Inferencia y registro de casos
 
 - `streamlit_app/pages/new_patient.py`
-  - Clinical intake form (patient and clinical info)
-  - RNA-Seq template generation (.xlsx) based on `feature_names.json`
-  - RNA-Seq validation and normalization
-  - Guided inference execution with progress stages
-  - ClinicalReport creation and HTML/PDF report rendering
+  - Formulario de recogida de datos clínicos y del paciente.
+  - Generación de la plantilla de RNA-Seq (.xlsx) basada en `feature_names.json`.
+  - Validación y normalización de los datos de RNA-Seq.
+  - Ejecución guiada de la inferencia con indicadores de progreso.
+  - Creación del `ClinicalReport` y generación de informes en formato HTML y PDF.
 
 - `managers/prediction_manager.py`
-  - Loads models and feature names
-  - Preprocesses input sample to model-expected schema
-  - Executes model 1 and model 2 (if tumor)
-  - Persists immutable prediction outputs and context snapshot
+  - Carga de los modelos y de los nombres de las variables (`feature_names`).
+  - Preprocesamiento de la muestra de entrada para adaptarla al formato esperado por el modelo.
+  - Ejecución del Modelo 1 y, en caso de detectar un tumor, del Modelo 2.
+  - Almacenamiento persistente de las predicciones y de una instantánea inmutable del contexto del análisis.
 
 - `services/report_generator.py`
-  - Single source of truth object: `ClinicalReport`
-  - Generates both HTML and PDF views from same object
-  - Includes mandatory disclaimer
+  - Define el objeto `ClinicalReport` como única fuente de información del informe.
+  - Genera tanto la versión HTML como la PDF a partir del mismo objeto.
+  - Incluye el aviso legal (disclaimer) obligatorio.
 
-### Clinical Validation Lifecycle
+### Ciclo de vida de la validación clínica
 
 - `streamlit_app/pages/history.py`
-  - Case table with status and actions
-  - Diagnosis confirmation form for pending cases
-  - Automatic comparison display (correct/incorrect)
-  - Manual retraining trigger and model version history view
+  - Tabla de casos con su estado y acciones disponibles.
+  - Formulario de confirmación del diagnóstico para los casos pendientes.
+  - Comparación automática entre la predicción y el diagnóstico confirmado (correcto/incorrecto).
+  - Ejecución manual del reentrenamiento y visualización del historial de versiones de los modelos.
 
 - `managers/feedback_manager.py`
-  - Delegates confirmation trigger to database service
+  - Delega el proceso de confirmación del diagnóstico al servicio de base de datos.
 
 - `streamlit_app/database/cdss_database.py`
-  - Stores prediction snapshot, pending/confirmed state, confirmed diagnosis, comparison result
-  - Keeps original prediction unchanged after validation
-  - Marks confirmed cases as retraining-eligible
-  - Stores model version metadata for retraining outputs
+  - Almacena la instantánea de la predicción, el estado del caso (pendiente o confirmado), el diagnóstico confirmado y el resultado de la comparación.
+  - Conserva la predicción original sin modificaciones tras la validación clínica.
+  - Marca los casos confirmados como aptos para el reentrenamiento.
+  - Guarda la información de versionado de los modelos generados tras el reentrenamiento.
 
-### Retraining (Manual)
+### Reentrenamiento (manual)
 
 - `services/retraining.py`
-  - Uses only clinically confirmed and eligible cases
-  - Builds retraining set from persisted sample snapshots
-  - Retrains models on demand only
-  - Writes versioned model artifacts and metrics
+  - Utiliza únicamente los casos clínicamente confirmados y marcados como aptos para el reentrenamiento.
+  - Construye el conjunto de datos de reentrenamiento a partir de las muestras almacenadas.
+  - Reentrena los modelos únicamente bajo demanda.
+  - Genera nuevas versiones de los modelos junto con sus métricas de rendimiento.
 
-## Data Model Highlights
+## Aspectos principales del modelo de datos
 
-The `predictions` table now captures:
+La tabla `predictions` almacena:
 
-- Patient and clinical context at analysis time
-- Model 1 and model 2 outputs and probabilities
-- Validation summary snapshot
-- Clinical validation lifecycle fields:
+- Información del paciente y del contexto clínico en el momento del análisis.
+- Resultados y probabilidades del Modelo 1 y del Modelo 2.
+- Resumen del proceso de validación.
+- Campos asociados al ciclo de validación clínica:
   - `confirmed_diagnosis`
-  - `case_status` (`PENDIENTE_VALIDACION` or `CONFIRMADO`)
-  - `comparison_result` (`CORRECTO`/`INCORRECTO`)
+  - `case_status` (`PENDIENTE_VALIDACION` o `CONFIRMADO`)
+  - `comparison_result` (`CORRECTO` o `INCORRECTO`)
   - `is_correct`
   - `retraining_eligible`
 
-## Safety Principle
+## Principio de seguridad
 
-All reports and UI semantics state results as AI predictions for decision support, not definitive diagnosis.
+Todos los informes y elementos de la interfaz presentan los resultados como **predicciones generadas por Inteligencia Artificial para apoyar la toma de decisiones clínicas**, y **nunca como un diagnóstico médico definitivo**.

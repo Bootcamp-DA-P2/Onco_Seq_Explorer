@@ -234,7 +234,7 @@ def _render_tumor_pca_chart(selected_cohorts: list[str]) -> None:
     st.plotly_chart(fig_pca, use_container_width=True)
 
 def _render_transcriptomic_html_preview() -> None:
-    st.markdown("### Vista embebida: transcriptomic_space_explorer.html")
+    st.markdown("### Mapa de Expresión Génica")
 
     html_path = config.PCA_HTML_PATH
     pca_csv_path = config.PCA_DATA_CSV_PATH
