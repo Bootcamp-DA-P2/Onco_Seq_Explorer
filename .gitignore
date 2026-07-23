@@ -43,3 +43,4 @@ __pycache__/
 # Configuración local (contiene tu ruta personal de Drive)
 config.yaml
 
+.env
