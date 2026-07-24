@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+from time import perf_counter
 
 import pandas as pd
 import streamlit as st
@@ -13,6 +15,20 @@ from database.cdss_database import CDSSDatabase
 
 
 VALID_DIAGNOSES = ["NORMAL", "BRCA", "COAD", "KIRC", "LUAD", "PRAD"]
+
+
+def _is_dev_mode() -> bool:
+    secret_flag = bool(st.secrets.get("DEV_MODE", False))
+    env_flag = os.getenv("ONCOSEQ_DEV_MODE", "0").strip().lower() in {"1", "true", "yes", "on"}
+    return secret_flag or env_flag
+
+
+def _render_perf_metrics(perf: dict[str, float]) -> None:
+    if not perf:
+        return
+    with st.expander("Metricas de rendimiento (dev)"):
+        rows = [{"Etapa": key, "Tiempo (ms)": round(float(value), 2)} for key, value in perf.items()]
+        st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
 
 def _human_status(status: str) -> str:
@@ -103,7 +119,7 @@ def _render_retraining_panel(database: CDSSDatabase) -> None:
     with col_a:
         render_kpi_card("Casos aptos para reentrenamiento", str(len(eligible_cases)), "Confirmados y con muestra")
     with col_b:
-        if st.button("Ejecutar reentrenamiento manual", type="secondary", use_container_width=True):
+        if st.button("Ejecutar reentrenamiento manual", type="secondary", width="stretch"):
             service = RetrainingService()
             result = service.run_manual_retraining()
             if result.get("ok"):
@@ -136,7 +152,7 @@ def _render_retraining_panel(database: CDSSDatabase) -> None:
                 }
             )
         st.markdown("#### Historial de versiones")
-        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
 
 def render() -> None:
@@ -146,8 +162,15 @@ def render() -> None:
     )
 
     database = CDSSDatabase()
+    perf: dict[str, float] = {}
+
+    t0 = perf_counter()
     rows = database.get_predictions(limit=1000)
+    perf["history_get_predictions_ms"] = (perf_counter() - t0) * 1000.0
+
+    t0 = perf_counter()
     dataframe = pd.DataFrame(rows)
+    perf["history_dataframe_build_ms"] = (perf_counter() - t0) * 1000.0
 
     if dataframe.empty:
         render_status_card("Sin casos", "Aun no hay casos analizados en el sistema.", "warning")
@@ -177,7 +200,7 @@ def render() -> None:
             "Resultado",
             "Acciones",
         ]],
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -185,3 +208,6 @@ def render() -> None:
     _render_confirmation_forms(dataframe)
 
     _render_retraining_panel(database)
+
+    if _is_dev_mode():
+        _render_perf_metrics(perf)

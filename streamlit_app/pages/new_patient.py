@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import os
+import uuid
+import hashlib
 from datetime import datetime
 from io import BytesIO
+from time import perf_counter
 from urllib.parse import quote
 from typing import Any, Dict, Tuple
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
@@ -86,6 +91,51 @@ def _inject_page_style() -> None:
     )
 
 
+def _is_dev_mode() -> bool:
+    secret_flag = bool(st.secrets.get("DEV_MODE", False))
+    env_flag = os.getenv("ONCOSEQ_DEV_MODE", "0").strip().lower() in {"1", "true", "yes", "on"}
+    return secret_flag or env_flag
+
+
+def _render_perf_metrics(perf: Dict[str, float | str]) -> None:
+    if not perf:
+        return
+    with st.expander("Metricas de rendimiento (dev)"):
+        rows = []
+        for key, value in perf.items():
+            if isinstance(value, (int, float)):
+                rows.append({"Etapa": key, "Tiempo (ms)": round(float(value), 2)})
+            else:
+                rows.append({"Etapa": key, "Tiempo (ms)": value})
+        st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+
+
+def _df_signature(dataframe: pd.DataFrame) -> str:
+    digest = pd.util.hash_pandas_object(dataframe, index=True).values.tobytes()
+    return hashlib.sha256(digest).hexdigest()
+
+
+@st.cache_resource
+def _get_db() -> CDSSDatabase:
+    return CDSSDatabase()
+
+
+@st.cache_resource
+def _get_prediction_manager() -> PredictionManager:
+    return PredictionManager()
+
+
+@st.cache_resource
+def _get_report_service() -> ReportGeneratorService:
+    return ReportGeneratorService()
+
+
+@st.cache_data(show_spinner=False)
+def _load_feature_names_cached(feature_path: str) -> list[str]:
+    data = read_json_file(Path(feature_path))
+    return data if isinstance(data, list) else []
+
+
 def _calculate_bmi(weight_kg: float, height_cm: float) -> tuple[float | None, str]:
     if height_cm <= 0 or weight_kg <= 0:
         return None, "No disponible"
@@ -135,6 +185,11 @@ def _build_excel_template(feature_names: list[str]) -> bytes:
         sample_df.to_excel(writer, index=False, sheet_name="Muestra")
     buffer.seek(0)
     return buffer.getvalue()
+
+
+@st.cache_data(show_spinner=False)
+def _build_excel_template_cached(feature_names: tuple[str, ...]) -> bytes:
+    return _build_excel_template(list(feature_names))
 
 
 def _validate_uploaded_sample(uploaded_file, feature_names: list[str]) -> Tuple[pd.DataFrame | None, Dict[str, Any]]:
@@ -336,11 +391,9 @@ def _render_advanced_analysis(prediction_payload: Dict[str, Any]) -> None:
     )
 
 
-def _render_report(report: ClinicalReport, report_service: ReportGeneratorService) -> None:
+def _render_report(report: ClinicalReport, report_html: str, pdf_bytes: bytes | None) -> None:
     st.markdown("### Informe clinico")
-    html = report_service.render_html_report(report)
 
-    pdf_bytes = report_service.build_pdf_from_html(html)
     if pdf_bytes is not None:
         st.download_button(
             label="Descargar informe PDF",
@@ -351,7 +404,7 @@ def _render_report(report: ClinicalReport, report_service: ReportGeneratorServic
     else:
         st.info("No fue posible generar el PDF en este entorno. El informe HTML permanece disponible.")
 
-    html_data_url = "data:text/html;charset=utf-8," + quote(html)
+    html_data_url = "data:text/html;charset=utf-8," + quote(report_html)
     st.iframe(html_data_url, height=980)
 
 
@@ -362,11 +415,11 @@ def render() -> None:
         "Registro clinico, validacion de muestra y prediccion IA en una sola vista.",
     )
 
-    db = CDSSDatabase()
-    prediction_manager = PredictionManager()
-    report_service = ReportGeneratorService()
+    db = _get_db()
+    prediction_manager = _get_prediction_manager()
+    report_service = _get_report_service()
 
-    feature_names = read_json_file(config.FEATURE_NAMES_PATH)
+    feature_names = _load_feature_names_cached(str(config.FEATURE_NAMES_PATH))
     if not isinstance(feature_names, list) or not feature_names:
         render_status_card("Configuracion incompleta", "No se encontro feature_names.json valido.", "error")
         return
@@ -379,12 +432,30 @@ def render() -> None:
         st.session_state.new_patient_prediction = None
     if "new_patient_report" not in st.session_state:
         st.session_state.new_patient_report = None
+    if "new_patient_report_html" not in st.session_state:
+        st.session_state.new_patient_report_html = None
+    if "new_patient_report_pdf" not in st.session_state:
+        st.session_state.new_patient_report_pdf = None
+    if "new_patient_perf" not in st.session_state:
+        st.session_state.new_patient_perf = {}
+    if "new_patient_is_running" not in st.session_state:
+        st.session_state.new_patient_is_running = False
+    if "new_patient_last_request_signature" not in st.session_state:
+        st.session_state.new_patient_last_request_signature = None
+    if "new_patient_upload_token" not in st.session_state:
+        st.session_state.new_patient_upload_token = None
 
     if st.button("Nueva evaluacion", width="content"):
         st.session_state.new_patient_validated_df = None
         st.session_state.new_patient_validation_summary = {}
         st.session_state.new_patient_prediction = None
         st.session_state.new_patient_report = None
+        st.session_state.new_patient_report_html = None
+        st.session_state.new_patient_report_pdf = None
+        st.session_state.new_patient_perf = {}
+        st.session_state.new_patient_is_running = False
+        st.session_state.new_patient_last_request_signature = None
+        st.session_state.new_patient_upload_token = None
         st.rerun()
 
     st.markdown('<div class="np-shell">', unsafe_allow_html=True)
@@ -422,7 +493,7 @@ def render() -> None:
 
     c1, c2 = st.columns([1, 1])
     with c1:
-        template_xlsx = _build_excel_template(feature_names)
+        template_xlsx = _build_excel_template_cached(tuple(feature_names))
         st.download_button(
             label="Descargar plantilla Excel",
             data=template_xlsx,
@@ -434,9 +505,15 @@ def render() -> None:
         upload = st.file_uploader("Subir muestra RNA-Seq (.xlsx)", type=["xlsx"])
 
     if upload is not None:
-        validated_df, validation_summary = _validate_uploaded_sample(upload, feature_names)
-        st.session_state.new_patient_validated_df = validated_df
-        st.session_state.new_patient_validation_summary = validation_summary
+        upload_token = f"{upload.name}:{upload.size}"
+        if upload_token != st.session_state.new_patient_upload_token:
+            validated_df, validation_summary = _validate_uploaded_sample(upload, feature_names)
+            st.session_state.new_patient_validated_df = validated_df
+            st.session_state.new_patient_validation_summary = validation_summary
+            st.session_state.new_patient_upload_token = upload_token
+        else:
+            validated_df = st.session_state.new_patient_validated_df
+            validation_summary = st.session_state.new_patient_validation_summary or {}
 
         if validation_summary.get("status") in {"VALIDA", "VALIDA_CON_AJUSTES"}:
             render_status_card("Muestra procesada", validation_summary.get("message", ""), "ok")
@@ -455,11 +532,18 @@ def render() -> None:
                 st.caption("Genes faltantes: " + ", ".join(missing_genes))
             if extra_genes:
                 st.caption("Genes adicionales: " + ", ".join(extra_genes))
+    else:
+        st.session_state.new_patient_upload_token = None
 
     st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('<div class="np-card"><div class="np-step">Paso 3</div><h3 class="np-title">Ejecutar prediccion</h3>', unsafe_allow_html=True)
-    analyze_clicked = st.button("Analizar muestra", type="primary", width="stretch")
+    analyze_clicked = st.button(
+        "Analizar muestra",
+        type="primary",
+        width="stretch",
+        disabled=bool(st.session_state.new_patient_is_running),
+    )
     st.markdown('</div>', unsafe_allow_html=True)
 
     if analyze_clicked:
@@ -474,91 +558,156 @@ def render() -> None:
             render_status_card("Muestra no valida", "Sube y valida una muestra antes de analizar.", "warning")
             return
 
-        patient_payload = _build_patient_payload(
-            patient_id=patient_id,
-            first_name=first_name,
-            last_name=last_name,
-            age=int(age),
-            sex=sex,
-            nationality=nationality,
-            weight_kg=float(weight_kg),
-            height_cm=float(height_cm),
-            bmi=bmi_value,
-            bmi_classification=bmi_classification,
-            smoker_status=smoker_status,
-            clinical_notes=clinical_notes,
+        request_signature = "|".join(
+            [
+                patient_id.strip(),
+                _df_signature(validated_df),
+                str(bool(consent)),
+                clinical_notes.strip(),
+            ]
         )
 
-        progress = st.progress(0, text="Validando muestra")
-        progress.progress(25, text="Ejecutando Modelo 1")
+        if (
+            request_signature == st.session_state.new_patient_last_request_signature
+            and st.session_state.new_patient_prediction is not None
+            and st.session_state.new_patient_report is not None
+        ):
+            render_status_card(
+                "Analisis ya disponible",
+                "Se reutilizaron los resultados del ultimo analisis para evitar ejecuciones duplicadas.",
+                "warning",
+            )
+            return
 
-        storage_context = _build_storage_context(patient_payload, consent=consent)
-        if consent:
-            db.save_or_update_patient(patient_payload)
+        if st.session_state.new_patient_is_running:
+            render_status_card("Proceso en curso", "Ya hay una ejecucion en progreso.", "warning")
+            return
 
-        prediction_payload = prediction_manager.run_prediction(
-            sample_df=validated_df,
-            sample_name=f"sample_{patient_id.strip()}",
-            user_notes=clinical_notes if consent else "",
-            patient_context=storage_context,
-            validation_summary=validation_summary,
-        )
+        st.session_state.new_patient_is_running = True
+        perf: Dict[str, float | str] = {}
 
-        progress.progress(60, text="Ejecutando Modelo 2")
-        progress.progress(85, text="Generando informe de resultados")
+        try:
+            patient_payload = _build_patient_payload(
+                patient_id=patient_id,
+                first_name=first_name,
+                last_name=last_name,
+                age=int(age),
+                sex=sex,
+                nationality=nationality,
+                weight_kg=float(weight_kg),
+                height_cm=float(height_cm),
+                bmi=bmi_value,
+                bmi_classification=bmi_classification,
+                smoker_status=smoker_status,
+                clinical_notes=clinical_notes,
+            )
 
-        model1_result = {
-            "predicted_label": str(prediction_payload.get("stage1_prediction", "")).upper(),
-            "normal_tumoral": "Tumoral" if prediction_payload.get("is_tumor") else "Normal",
-            "probability": _format_pct(prediction_payload.get("stage1_probability")),
-        }
-        model2_result = {
-            "predicted_cancer": prediction_payload.get("stage2_prediction") or "No aplica",
-            "probability": (
-                _format_pct(prediction_payload.get("stage2_probability"))
-                if prediction_payload.get("is_tumor")
-                else "No aplica"
-            ),
-        }
+            progress = st.progress(0, text="Validando muestra")
+            progress.progress(25, text="Ejecutando Modelo 1")
 
-        report = report_service.create_clinical_report(
-            patient={
-                "patient_id": patient_payload["patient_id"],
-                "first_name": patient_payload["first_name"],
-                "last_name": patient_payload["last_name"],
-                "age": patient_payload["age"],
-                "sex": patient_payload["sex"],
-                "nationality": patient_payload["nationality"],
-            },
-            clinical_info={
-                "weight_kg": patient_payload["weight_kg"],
-                "height_cm": patient_payload["height_cm"],
-                "bmi": patient_payload["bmi"],
-                "bmi_classification": patient_payload["bmi_classification"],
-                "smoker_status": patient_payload["smoker_status"],
-            },
-            sample_validation=validation_summary,
-            model1_result=model1_result,
-            model2_result=model2_result,
-            probabilities=prediction_payload.get("model2_probabilities", {}),
-            observations=clinical_notes,
-        )
+            storage_context = _build_storage_context(patient_payload, consent=consent)
+            if consent:
+                t0 = perf_counter()
+                db.save_or_update_patient(patient_payload)
+                perf["db_save_or_update_patient_ms"] = round((perf_counter() - t0) * 1000.0, 2)
 
-        st.session_state.new_patient_prediction = prediction_payload
-        st.session_state.new_patient_report = report
+            sample_name = f"sample_{patient_id.strip()}_{datetime.now().strftime('%Y%m%d%H%M%S_%f')}_{uuid.uuid4().hex[:6]}"
 
-        progress.progress(100, text="Analisis completado")
-        if consent:
-            render_status_card("Analisis completado", "Prediccion registrada con consentimiento para investigacion.", "ok")
-        else:
-            render_status_card("Analisis completado", "Prediccion ejecutada sin almacenar datos personales.", "ok")
+            t0 = perf_counter()
+            prediction_payload = prediction_manager.run_prediction(
+                sample_df=validated_df,
+                sample_name=sample_name,
+                user_notes=clinical_notes if consent else "",
+                patient_context=storage_context,
+                validation_summary=validation_summary,
+            )
+            perf["prediction_pipeline_ms"] = round((perf_counter() - t0) * 1000.0, 2)
+            for key, value in (prediction_payload.get("_timings") or {}).items():
+                perf[f"prediction_{key}"] = value
+
+            progress.progress(60, text="Ejecutando Modelo 2")
+            progress.progress(85, text="Generando informe de resultados")
+
+            model1_result = {
+                "predicted_label": str(prediction_payload.get("stage1_prediction", "")).upper(),
+                "normal_tumoral": "Tumoral" if prediction_payload.get("is_tumor") else "Normal",
+                "probability": _format_pct(prediction_payload.get("stage1_probability")),
+            }
+            model2_result = {
+                "predicted_cancer": prediction_payload.get("stage2_prediction") or "No aplica",
+                "probability": (
+                    _format_pct(prediction_payload.get("stage2_probability"))
+                    if prediction_payload.get("is_tumor")
+                    else "No aplica"
+                ),
+            }
+
+            t0 = perf_counter()
+            report = report_service.create_clinical_report(
+                patient={
+                    "patient_id": patient_payload["patient_id"],
+                    "first_name": patient_payload["first_name"],
+                    "last_name": patient_payload["last_name"],
+                    "age": patient_payload["age"],
+                    "sex": patient_payload["sex"],
+                    "nationality": patient_payload["nationality"],
+                },
+                clinical_info={
+                    "weight_kg": patient_payload["weight_kg"],
+                    "height_cm": patient_payload["height_cm"],
+                    "bmi": patient_payload["bmi"],
+                    "bmi_classification": patient_payload["bmi_classification"],
+                    "smoker_status": patient_payload["smoker_status"],
+                },
+                sample_validation=validation_summary,
+                model1_result=model1_result,
+                model2_result=model2_result,
+                probabilities=prediction_payload.get("model2_probabilities", {}),
+                observations=clinical_notes,
+            )
+            perf["report_create_ms"] = round((perf_counter() - t0) * 1000.0, 2)
+
+            t0 = perf_counter()
+            report_html = report_service.render_html_report(report)
+            perf["report_html_ms"] = round((perf_counter() - t0) * 1000.0, 2)
+
+            t0 = perf_counter()
+            report_pdf = report_service.build_pdf_from_html(report_html)
+            perf["report_pdf_ms"] = round((perf_counter() - t0) * 1000.0, 2)
+
+            st.session_state.new_patient_prediction = prediction_payload
+            st.session_state.new_patient_report = report
+            st.session_state.new_patient_report_html = report_html
+            st.session_state.new_patient_report_pdf = report_pdf
+            st.session_state.new_patient_perf = perf
+            st.session_state.new_patient_last_request_signature = request_signature
+
+            progress.progress(100, text="Analisis completado")
+            if consent:
+                render_status_card("Analisis completado", "Prediccion registrada con consentimiento para investigacion.", "ok")
+            else:
+                render_status_card("Analisis completado", "Prediccion ejecutada sin almacenar datos personales.", "ok")
+        finally:
+            st.session_state.new_patient_is_running = False
 
     if st.session_state.new_patient_prediction and st.session_state.new_patient_report:
+        report_html = st.session_state.get("new_patient_report_html")
+        report_pdf = st.session_state.get("new_patient_report_pdf")
+        if not report_html:
+            report_html = report_service.render_html_report(st.session_state.new_patient_report)
+            st.session_state.new_patient_report_html = report_html
+        if report_pdf is None:
+            report_pdf = report_service.build_pdf_from_html(report_html)
+            st.session_state.new_patient_report_pdf = report_pdf
+
         result_tab, advanced_tab = st.tabs(["Resultado clinico", "Analisis avanzado"])
         with result_tab:
             _render_primary_results(st.session_state.new_patient_prediction)
-            _render_report(st.session_state.new_patient_report, report_service)
+            _render_report(st.session_state.new_patient_report, report_html, report_pdf)
         with advanced_tab:
             _render_advanced_analysis(st.session_state.new_patient_prediction)
+
+    if _is_dev_mode():
+        _render_perf_metrics(st.session_state.get("new_patient_perf", {}))
 
     st.markdown('</div>', unsafe_allow_html=True)

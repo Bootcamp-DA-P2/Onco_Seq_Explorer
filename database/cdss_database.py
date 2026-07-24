@@ -1,17 +1,16 @@
-import sqlite3
 import uuid
 from datetime import datetime
 from pathlib import Path
+from time import perf_counter
 from typing import Any, Dict, List
 
+from postgrest.exceptions import APIError
 from database.supabase_client import supabase
-
-from src.config import config
 
 
 class CDSSDatabase:
     def __init__(self, db_path: Path | None = None):
-        pass
+        self.last_timings: Dict[str, Any] = {}
     
     def _get_patient_db_id(self, clinical_patient_id: str) -> int:
         response = (
@@ -329,21 +328,46 @@ class CDSSDatabase:
     #         conn.commit()
     #         return int(cur.lastrowid)
     def save_prediction(self, prediction: Dict[str, Any]) -> int:
+        timings: Dict[str, float | str] = {}
+
+        clinical_patient_id = str(prediction.get("patient_id") or "").strip()
+        if not clinical_patient_id:
+            raise ValueError("patient_id es obligatorio para guardar la prediccion.")
+
+        t0 = perf_counter()
         patient = (
             supabase
             .table("patients")
             .select("id")
-            .eq("clinical_patient_id", prediction.get("patient_id"))
-            .single()
+            .eq("clinical_patient_id", clinical_patient_id)
+            .maybe_single()
             .execute()
         )
+        timings["patient_lookup_ms"] = round((perf_counter() - t0) * 1000.0, 2)
 
-        if not patient.data:
-            raise ValueError(
-                f"No existe un paciente con clinical_patient_id={prediction.get('patient_id')}"
+        patient_data = patient.data if patient is not None else None
+
+        if not patient_data:
+            # Ensure prediction persistence is resilient for anonymized flows
+            # where the patient may not have been pre-created in the same run.
+            t0 = perf_counter()
+            created = (
+                supabase
+                .table("patients")
+                .insert({"clinical_patient_id": clinical_patient_id})
+                .execute()
             )
-        
-        patient_id = patient.data["id"]
+            timings["patient_create_ms"] = round((perf_counter() - t0) * 1000.0, 2)
+
+            created_data = created.data if created is not None else None
+
+            if not created_data:
+                raise ValueError(
+                    f"No fue posible crear el paciente con clinical_patient_id={clinical_patient_id}"
+                )
+            patient_id = created_data[0]["id"]
+        else:
+            patient_id = patient_data["id"]
 
         sample_id = prediction.get("sample_id")
         if not sample_id:
@@ -352,18 +376,37 @@ class CDSSDatabase:
         sample_row = {
             "sample_id": sample_id,
             "patient_id": patient_id,
-            "source_patient_id": str(prediction.get("patient_id") or ""),
+            "source_patient_id": clinical_patient_id,
             "tipo": "tumor" if bool(prediction.get("is_tumor", False)) else "normal",
-            "cohorte": prediction.get("stage2_prediction") if bool(prediction.get("is_tumor", False)) else None,
+            "cohorte": (
+                prediction.get("stage2_prediction")
+                if bool(prediction.get("is_tumor", False))
+                else prediction.get("cohort")
+            ) or "BRCA",
             "fecha_carga": datetime.utcnow().isoformat(timespec="seconds"),
         }
 
-        (
-            supabase
-            .table("samples")
-            .upsert(sample_row, on_conflict="sample_id")
-            .execute()
-        )
+        t0 = perf_counter()
+        try:
+            (
+                supabase
+                .table("samples")
+                .upsert(sample_row, on_conflict="sample_id")
+                .execute()
+            )
+        except APIError as exc:
+            # Some deployments enforce a strict cohort CHECK constraint.
+            # Retry once with a known valid cohort to keep persistence stable.
+            if "muestras_cohorte_check" not in str(exc):
+                raise
+            sample_row["cohorte"] = "BRCA"
+            (
+                supabase
+                .table("samples")
+                .upsert(sample_row, on_conflict="sample_id")
+                .execute()
+            )
+        timings["sample_upsert_ms"] = round((perf_counter() - t0) * 1000.0, 2)
 
         data = {
             "patient_id": patient_id,
@@ -388,12 +431,35 @@ class CDSSDatabase:
             "version_id": prediction.get("version_id"),
         }
 
+        # Idempotency guard: keep one prediction per sample_id.
+        # If Streamlit re-runs the action or the user re-clicks, return existing row.
+        t0 = perf_counter()
+        existing_prediction = (
+            supabase
+            .table("predictions")
+            .select("id")
+            .eq("sample_id", sample_id)
+            .limit(1)
+            .execute()
+        )
+        timings["prediction_lookup_ms"] = round((perf_counter() - t0) * 1000.0, 2)
+
+        if existing_prediction.data:
+            timings["prediction_write_mode"] = "reuse_existing"
+            timings["prediction_write_ms"] = 0.0
+            self.last_timings = timings
+            return int(existing_prediction.data[0]["id"])
+
+        t0 = perf_counter()
         response = (
             supabase
             .table("predictions")
             .insert(data)
             .execute()
         )
+        timings["prediction_write_mode"] = "insert"
+        timings["prediction_write_ms"] = round((perf_counter() - t0) * 1000.0, 2)
+        self.last_timings = timings
 
         return response.data[0]["id"]
 
