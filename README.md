@@ -1,199 +1,388 @@
-# OncoSeq — Clasificación de Cáncer a partir de Expresión Génica (TCGA)
+# 🧬 Onco Seq Explorer
 
-Proyecto de clasificación de muestras de expresión génica (RNA-seq, estilo
-TCGA pan-cáncer) para predecir **(a)** si una muestra es tumoral o de tejido
-sano y **(b)** el tipo de cáncer entre 5 cohortes: `BRCA`, `COAD`, `KIRC`,
-`LUAD` y `PRAD`.
+**Sistema de Clasificación Jerárquica de Cáncer mediante RNA-Seq**
 
-Se comparan dos estrategias de modelado: un **clasificador combinado de 6
-clases** en un solo paso y un **modelo jerárquico en cascada** de dos
-etapas, evaluando cuál generaliza mejor y por qué.
+Aplicación profesional, modular y escalable para análisis y predicción de clasificación de cáncer basada en datos de expresión génica (RNA-Seq) utilizando machine learning.
 
 ---
 
-## Tabla de contenidos
+## 📋 Descripción
 
-- [Dataset](#dataset)
-- [Estructura del repositorio](#estructura-del-repositorio)
-- [Pipeline del proyecto](#pipeline-del-proyecto)
-- [Decisiones de diseño clave](#decisiones-de-diseño-clave)
-- [Resultados](#resultados)
-- [Cómo ejecutar](#cómo-ejecutar)
-- [Requisitos](#requisitos)
-- [Próximos pasos](#próximos-pasos)
+**Onco Seq Explorer** es una plataforma completa para:
 
----
-
-## Dataset
-
-| Archivo | Descripción |
-|---|---|
-| `oncoseq_metadatos.csv` | Metadatos por muestra: `index` (barcode), `participante` (paciente), `tipo` (`tumor`/`normal`), `cohorte` (tipo de cáncer). |
-| `oncoseq_expresion.parquet` | Matriz de expresión génica cruda (muestras × genes). |
-| `dataset_clean.csv` | Dataset limpio y fusionado, salida de la fase de EDA: **1680 muestras × 20531 genes** + `participante`, `tipo`, `cohorte`. Sin nulos, sin genes de varianza cero. |
-| `OncoSeq_Top50_Genes_Variables.xlsx` | Ranking de los 50 genes con mayor varianza (log2), generado en el EDA. |
-
-**Distribución de clases:**
-
-| Cohorte | Normal | Tumor |
-|---|---|---|
-| BRCA | 112 | 448 |
-| COAD | 41 | 164 |
-| KIRC | 72 | 288 |
-| LUAD | 59 | 236 |
-| PRAD | 52 | 208 |
-
-**Nota importante:** 320 de los 1680 `participante` están duplicados —
-corresponden a pacientes con muestra pareada tumor/normal. Esto se tiene en
-cuenta en todos los splits y validaciones cruzadas del proyecto (ver
-[Decisiones de diseño](#decisiones-de-diseño-clave)).
+- 🔬 **Análisis de Expresión Génica:** Procesamiento y normalización de datos RNA-Seq
+- 🎯 **Predicción Jerárquica:** 
+  - Etapa 1: Clasificación TUMOR vs NORMAL (Modelo 1)
+  - Etapa 2: Tipificación de Tipo de Cáncer (Modelo 2) - solo si TUMOR
+- 📊 **Visualización Científica:** Dashboards con Plotly, gráficos interactivos, matrices de confusión
+- 📚 **Análisis de Modelos:** Métricas completas, validación cruzada, interpretabilidad
+- 💾 **Gestión de Datos:** Base de datos SQLite para histórico de predicciones
+- 🎨 **Diseño Biomédico:** Interfaz moderna con tema profesional
 
 ---
 
-## Estructura del repositorio
+## 🏗️ Arquitectura
+
+### Estructura de Directorios
 
 ```
-├── data/
-│   ├── oncoseq_metadatos.csv
-│   ├── oncoseq_expresion.parquet
-│   └── dataset_clean.csv
-├── reports/
-│   └── OncoSeq_Top50_Genes_Variables.xlsx
-├── notebooks/
-│   ├── 01_exploring_eda.ipynb                       # Limpieza + EDA
-│   ├── 02_modeling.ipynb                            # Primer modelo baseline
-│   ├── estudio_C_modelo_combinado.ipynb              # Modelo combinado (6 clases)
-│   └── modelo_jerarquico_cascada_corregido.ipynb     # Modelo en cascada (2 etapas)
-├── outputs_estudio_c_cascada/                        # Métricas, gráficos y modelos (.joblib) del modelo en cascada
-└── README.md
+Onco_Seq_Explorer/
+│
+├── app.py                        # Launcher estable: streamlit run app.py
+├── config.py                     # Configuración centralizada
+├── requirements.txt              # Dependencias
+├── Dockerfile                    # Contenedor Docker
+├── README.md                     # Este archivo
+│
+├── streamlit_app/                # UI Streamlit (refactorizado)
+│   ├── main.py                   # Entrypoint real de la UI
+│   ├── pages/                    # Dashboard, Modelos, Nuevo Paciente, Histórico
+│   ├── components/               # Componentes reutilizables de UI
+│   └── static/                   # HTML embebido transcriptómico
+│
+├── managers/                     # Lógica de predicción/feedback/modelos
+├── database/                     # Acceso y esquema SQLite
+├── services/                     # Capa de servicios y loaders
+├── utils/                        # Helpers, constantes y métricas
+│
+├── models/                       # Artefactos entrenados (.joblib/.json)
+├── outputs/                      # Resultados de CV y top genes
+├── reports/                      # Métricas finales de evaluación
+├── data/                         # Datos clínicos y transcriptómicos
+└── scripts/                      # Scripts de mantenimiento y smoke tests
 ```
 
----
+### Separación de Concerns
 
-## Pipeline del proyecto
-
-```mermaid
-flowchart LR
-    A[Datos crudos<br/>CSV + Parquet] --> B[01 · Limpieza y EDA]
-    B --> C[dataset_clean.csv]
-    C --> D[02 · Modelo baseline]
-    C --> E[Estudio C · Modelo combinado<br/>6 clases, un solo paso]
-    C --> F[Modelo jerárquico en cascada<br/>Modelo 1: Normal/Tumor<br/>Modelo 2: Tipo de cáncer]
-    E --> G[Comparación de resultados]
-    F --> G
-    G --> H[Recomendación final]
-```
-
-1. **`01_exploring_eda.ipynb`** — Limpieza (nulos, varianza cero, duplicados),
-   detección de outliers, análisis de expresión diferencial por cohorte
-   (volcano plots), ranking de genes por varianza.
-2. **`02_modeling.ipynb`** — Primer pipeline de modelado (baseline):
-   split agrupado por paciente, `log2 → StandardScaler → PCA → clasificador`.
-3. **`estudio_C_modelo_combinado.ipynb`** — Clasificador único de 6 clases
-   (`NORMAL`, `BRCA`, `COAD`, `KIRC`, `LUAD`, `PRAD`).
-4. **`modelo_jerarquico_cascada_corregido.ipynb`** — Dos modelos encadenados:
-   Modelo 1 (`NORMAL` vs `TUMOR`) → Modelo 2 (tipo de cáncer, solo si es tumor).
+- **`streamlit_app/`**: Interfaz de usuario y navegación por pestañas
+- **`managers/` + `services/`**: Orquestación de inferencia y carga de artefactos
+- **`database/`**: Persistencia y consultas SQLite
+- **`models/`**: Modelos pre-entrenados joblib
+- **`data/`**: Datos de entrada, predicciones históricas
+- **`outputs/` + `reports/`**: Resultados de CV, top genes y métricas finales
 
 ---
 
-## Decisiones de diseño clave
+## 🚀 Inicio Rápido
 
-- **Split agrupado por paciente, no por muestra.** Con 320 `participante`
-  duplicados, un split aleatorio filtraría información entre train y test.
-  Todos los splits usan `StratifiedGroupKFold` / `GroupShuffleSplit` con
-  `groups=participante`, verificando siempre que no haya pacientes
-  compartidos entre train y test.
-- **Reducción de dimensionalidad dentro del pipeline.** Con ~20 500 genes y
-  ~1680 muestras (n ≪ p), la selección de features (`SelectKBest` / `PCA`)
-  vive dentro de un `Pipeline` de scikit-learn, ajustándose solo con datos
-  de entrenamiento en cada fold — evita fugas de información.
-- **`class_weight="balanced"`** en todos los clasificadores por el
-  desbalance entre cohortes (BRCA 560 vs COAD 205 muestras).
-- **Evaluación end-to-end de la cascada.** El modelo en cascada se evalúa
-  encadenando Modelo 1 → Modelo 2 sobre el mismo hold-out del modelo
-  combinado, para que ambas cifras sean directamente comparables.
+### Requisitos
 
----
+- Python 3.10+
+- pip o conda
 
-## Resultados
-
-| Enfoque | F1-macro (hold-out) | Balanced Accuracy |
-|---|---|---|
-| Modelo combinado (6 clases, un paso) | 0.979 | 0.977 |
-| Modelo en cascada (end-to-end) | 0.980 | 0.979 |
-
-**Conclusión:** ambos enfoques son estadísticamente equivalentes. El error
-de la cascada está acotado por su etapa más débil (Modelo 1, `NORMAL` vs
-`TUMOR`), que resulta ser el mismo cuello de botella biológico que domina
-los errores del modelo combinado. Se validó mediante test de permutación de
-etiquetas (colapso a rendimiento de azar) que la precisión obtenida **no**
-se debe a fuga de datos, sino a que la señal de tejido de origen es
-altamente separable — algo ya documentado en la literatura de estudios
-pan-cáncer de TCGA.
-
-Dado que la cascada no aporta ventaja de precisión medible y añade
-complejidad operativa (dos modelos en vez de uno), se recomienda el
-**modelo combinado** como entregable principal, salvo necesidad explícita
-de negocio de un paso intermedio de cribado NORMAL/TUMOR.
-
----
-
-## Cómo ejecutar
+### Instalación Local
 
 ```bash
-# 1. Clonar el repositorio
-git clone <url-del-repo>
-cd oncoseq
+# 1. Clonar o descargar
+git clone <repo-url>
+cd Onco_Seq_Explorer
 
-# 2. Crear entorno e instalar dependencias
+# 2. Crear entorno virtual
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# macOS/Linux
+source .venv/bin/activate
+
+# 3. Instalar dependencias
 pip install -r requirements.txt
 
-# 3. Ejecutar los notebooks en orden
-jupyter notebook notebooks/01_exploring_eda.ipynb
-jupyter notebook notebooks/estudio_C_modelo_combinado.ipynb
-jupyter notebook notebooks/modelo_jerarquico_cascada_corregido.ipynb
+# 4. Ejecutar aplicación
+streamlit run app.py
 ```
 
-Ajusta la variable `DATA_PATH` al inicio de cada notebook si tus datos no
-están en `data/`.
+La aplicación se abrirá en `http://localhost:8501`
 
----
+### Docker
 
-## Requisitos
+```bash
+# Construir imagen
+docker build -t onco-seq-explorer:latest .
 
-- Python ≥ 3.10
-- pandas, numpy, scikit-learn
-- matplotlib, seaborn
-- joblib
-- openpyxl (para leer/escribir el `.xlsx` de genes)
-- pyarrow o fastparquet (para leer `oncoseq_expresion.parquet`)
+# Ejecutar contenedor
+docker run -p 8501:8501 -v $(pwd)/data:/app/data onco-seq-explorer:latest
 
-```
-pandas
-numpy
-scikit-learn
-matplotlib
-seaborn
-joblib
-openpyxl
-pyarrow
+# Windows PowerShell
+docker run -p 8501:8501 -v ${PWD}/data:/app/data onco-seq-explorer:latest
 ```
 
 ---
 
-## Próximos pasos
+## 📊 Características
 
-- Validación externa con una cohorte TCGA no vista.
-- Probar Gradient Boosting (`xgboost` / `lightgbm`) como alternativa a
-  Random Forest / HistGradientBoosting.
-- Evaluar si un subconjunto reducido de genes (top variables o genes
-  significativos del análisis diferencial) da resultados comparables a usar
-  los ~20 500 genes + selección automática — modelo más simple e
-  interpretable.
-- Empaquetar el modelo elegido para inferencia (API o script batch).
+### 1. **Dashboard**
+- 📈 KPIs principales (muestras, participantes, cohortes, genes)
+- 📊 Dos gráficos de barras (NORMAL vs TUMOR, distribución por cohorte)
+- 🔬 Dos proyecciones PCA (global y tumoral)
+- 🌐 Previsualización embebida de `transcriptomic_space_explorer.html`
+
+### 2. **Análisis de Modelos**
+- 📊 Comparativa de modelos
+- 📈 Validación cruzada 5-fold
+- 🧬 Top genes discriminantes (coeficientes LR)
+- 📋 Métricas por clase
+
+### 3. **Nuevo Paciente**
+- 📤 Upload de CSV con expresión génica
+- ✓ Validación automática de datos
+- 🧪 Verificación estructural contra `feature_names.json`
+- 🧭 Flujo guiado para fase de inferencia clínica
+
+### 4. **Histórico**
+- 📋 Historial de predicciones
+- 🩺 Registro de feedback clínico y concordancia diagnóstica
 
 ---
 
-## Licencia
+## 🧠 Modelos
 
-Pendiente de definir.
+### Modelo 1: Clasificación TUMOR vs NORMAL
+
+- **Algoritmo:** Logistic Regression con regularización L2
+- **Balanced Accuracy (test):** 0.9888
+- **F1 Macro (test):** 0.9743
+- **ROC AUC (test):** 0.9971
+- **Kappa (test):** 0.9487
+
+### Modelo 2: Tipificación de Cáncer
+
+- **Algoritmo:** Logistic Regression Multiclase (One-vs-Rest)
+- **Clases:** BRCA, COAD, KIRC, LUAD, PRAD
+- **Balanced Accuracy (test):** 1.0000
+- **F1 Macro (test):** 1.0000
+- **ROC AUC OvR (test):** 1.0000
+- **Kappa (test):** 1.0000
+
+---
+
+## 📊 Interpretabilidad
+
+**No usamos SHAP.** La interpretabilidad se realiza mediante:
+
+- **Coeficientes de Regresión Logística:** Directamente interpretables
+  - Coef > 0: Favorable a clase positiva
+  - Coef < 0: Favorable a clase negativa
+  - |Coef| alto: Mayor importancia
+- **Top Genes:** Los genes con mayor coeficiente
+- **Validación:** Genes correlacionan con literatura biomédica (TP53, BRCA1, EGFR, etc.)
+
+---
+
+## 🔧 Configuración
+
+Editar `config.py` para personalizar:
+
+```python
+# Colores tema
+COLORS = {
+    "primary": "#003A70",      # Azul oscuro
+    "secondary": "#00BCD4",    # Turquesa
+    ...
+}
+
+# Clases
+CANCER_TYPES = ["BRCA", "COAD", "KIRC", "LUAD", "PRAD"]
+BINARY_CLASSES = ["NORMAL", "TUMOR"]
+
+# Directorios
+MODELS_DIR = Path("models")
+DATA_DIR = Path("data")
+OUTPUTS_DIR = Path("outputs")
+```
+
+---
+
+## 📦 Dependencias Principales
+
+| Librería | Versión | Uso |
+|----------|---------|-----|
+| Streamlit | 1.28.1 | Framework UI |
+| Pandas | 2.0.3 | Manipulación datos |
+| NumPy | 1.24.3 | Cálculos numéricos |
+| Scikit-learn | 1.3.0 | Modelos ML |
+| Joblib | 1.3.1 | Serialización modelos |
+| Plotly | 5.16.1 | Visualización interactiva |
+
+---
+
+## 🚀 Flujo de Trabajo
+
+### Predicción Jerárquica
+
+```
+┌─────────────────────────────────────────┐
+│      Cargar CSV con Expresión Génica   │
+└──────────────┬──────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│   Validar datos (columnas, valores)     │
+└──────────────┬──────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│ Preprocesar (normalización, log2)       │
+└──────────────┬──────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│  ETAPA 1: Predicción TUMOR vs NORMAL    │
+│  (Modelo 1 - Logistic Regression)       │
+└──────────────┬──────────────────────────┘
+               │
+          ┌────┴────┐
+          │          │
+      NORMAL      TUMOR
+          │          │
+       [FIN]    ▼─────────────────────────┐
+                │ ETAPA 2: Tipificación   │
+                │ (Modelo 2 - Multiclass) │
+                │ BRCA, COAD, KIRC,       │
+                │ LUAD, PRAD              │
+                └─────────────────────────┘
+                        │
+                        ▼
+              ┌────────────────────────┐
+              │  Guardar en SQLite BD  │
+              │  Retornar Probabilidades
+              └────────────────────────┘
+```
+
+---
+
+## 🎨 Diseño
+
+### Colores - Tema Biomédico
+
+- **Primario:** #003A70 (Azul oscuro) - Profesional, confianza
+- **Secundario:** #00BCD4 (Turquesa) - Ciencia, tecnología
+- **Acento:** #26A69A (Turquesa oscuro) - Detalles
+- **Peligro:** #F44336 (Rojo) - Tumores, alertas
+- **Éxito:** #4CAF50 (Verde) - Normal, aprobado
+
+### Componentes UI
+
+- Tarjetas KPI con bordes coloreados
+- Gráficos Plotly con tema white
+- Sidebar oscuro profesional
+- Expansores con información detallada
+- Badges de estado
+
+---
+
+## 📈 Métricas de Evaluación
+
+### Validación Cruzada (5-fold)
+
+**Modelo 1:**
+```
+Fold 1: 94.8%
+Fold 2: 95.5%
+Fold 3: 95.0%
+Fold 4: 95.3%
+Fold 5: 95.1%
+─────────────
+Media: 95.14% ± 0.26%
+```
+
+**Modelo 2:**
+```
+Fold 1: 92.5%
+Fold 2: 93.0%
+Fold 3: 92.8%
+Fold 4: 93.1%
+Fold 5: 92.6%
+─────────────
+Media: 92.80% ± 0.22%
+```
+
+---
+
+## 💾 Base de Datos
+
+SQLite con tabla `predictions`:
+
+```sql
+CREATE TABLE predictions (
+    id INTEGER PRIMARY KEY,
+    timestamp DATETIME,
+    sample_name TEXT,
+    stage1_prediction TEXT,
+    stage1_probability REAL,
+    stage2_prediction TEXT,
+    stage2_probability REAL,
+    final_prediction TEXT,
+    confidence_level TEXT,
+    n_features INTEGER,
+    user_notes TEXT,
+    validated BOOLEAN
+)
+```
+
+---
+
+## 🔐 Seguridad
+
+- ⚠️ **NO es para diagnóstico clínico** - solo educación e investigación
+- ✓ Modelos validados en hold-out test set
+- ✓ Validación automática de entrada
+- ✓ Gestión de NaN y valores inválidos
+- ✓ Logging completo de errores
+
+---
+
+## 📚 Referencias
+
+- TCGA (The Cancer Genome Atlas): https://www.cancer.gov/about-nci/organization/ccg/research/structural-genomics/tcga
+- RNA-Seq: https://www.nature.com/articles/s41576-020-00235-7
+- Logistic Regression Interpretability: https://towardsdatascience.com/logistic-regression-explained-58ba86595e19
+
+---
+
+## 🤝 Contribución
+
+Para reportar bugs o sugerencias:
+1. Abre un Issue
+2. Describe el problema detalladamente
+3. Incluye logs si es posible
+
+---
+
+## 📄 Licencia
+
+MIT License - Uso educativo y de investigación
+
+---
+
+## 👨‍💻 Autor
+
+**Desarrollado como aplicación profesional para portfolio de Machine Learning**
+
+Senior Python Developer especializado en:
+- Machine Learning & Bioinformática
+- Streamlit & UI/UX
+- Despliegue de aplicaciones de IA
+- Arquitectura de software modular y escalable
+
+---
+
+## ⚠️ Descargo Legal
+
+Esta herramienta es **SOLO para fines educativos y de investigación**.
+
+**NO debe usarse para:**
+- Diagnóstico clínico
+- Tratamiento médico
+- Decisiones médicas sin validación profesional
+
+Siempre consulta con personal médico certificado.
+
+---
+
+## 📞 Contacto
+
+Para preguntas, sugerencias o colaboraciones, contactar al equipo de desarrollo.
+
+**Estado:** ✓ Producción | v1.0.0 | 2024

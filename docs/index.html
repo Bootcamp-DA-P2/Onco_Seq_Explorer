@@ -549,6 +549,84 @@
           <div class="casc-metric"><span>Clases</span><b>BRCA · KIRC · LUAD · PRAD · COAD</b></div>
         </div>
       </div>
+<<<<<<< HEAD
+=======
+      <div class="finding-body">
+        <span class="micro-tag">UN BUG SILENCIOSO</span>
+        <h3>Una transformación de más cambiaba toda la biología</h3>
+        <p>
+          Los datos ya venían en escala logarítmica, pero una función del análisis exploratorio
+          volvía a aplicarla. El resultado no daba ningún error: simplemente comprimía los
+          valores hasta aplastar las diferencias reales entre genes.
+        </p>
+        <p>
+          Sobrevivían solo los genes de patrón binario — los del cromosoma Y, que se tienen o
+          no según el sexo. <strong>El ranking de genes más informativos era, en realidad, una
+          lista de genes de sexo.</strong>
+        </p>
+        <p class="finding-note">
+          Lo detectamos contrastando el resultado con la biología conocida: si KLK3 no aparece
+          arriba en un dataset con 260 muestras de próstata, algo va mal.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding">
+      <div class="finding-figure">
+        <div class="spread">
+          <div class="spread-bar">
+            <div class="spread-top" style="width:0.6%"></div>
+          </div>
+          <div class="spread-legend">
+            <div><b>0,6 %</b><span>peso de los 15 genes principales</span></div>
+            <div><b>5.214</b><span>genes que aportan al modelo</span></div>
+          </div>
+        </div>
+        <span class="finding-cap">Distribución del peso entre los coeficientes del modelo</span>
+      </div>
+      <div class="finding-body">
+        <span class="micro-tag">CÓMO DECIDE EL MODELO</span>
+        <h3>Una firma difusa, no unos pocos marcadores</h3>
+        <p>
+          Esperábamos encontrar oncogenes conocidos dominando la decisión. En su lugar, los
+          quince genes más influyentes suman apenas el 0,6% del peso total, y más de cinco mil
+          genes contribuyen de forma apreciable.
+        </p>
+        <p>
+          El modelo no detecta «los genes del cáncer»: <strong>suma miles de diferencias
+          pequeñas repartidas por todo el transcriptoma.</strong> Eso explica su precisión
+          (AUC 0,996) y también su límite.
+        </p>
+        <p class="finding-note">
+          Consecuencia honesta: los genes del ranking tienen relevancia estadística, no
+          necesariamente causal. No podemos señalar cinco genes y decir que provocan el tumor.
+        </p>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     DEMO
+     ============================================================ -->
+<section class="sec sec-demo" id="demo">
+  <div class="demo-inner">
+    <span class="sec-tag light">05 — Demo</span>
+    <h2>Pruébalo con una muestra</h2>
+    <p class="demo-lead">
+      Sube un perfil de expresión y observa el recorrido completo: cribado tumoral, tipificación
+      del órgano de origen, nivel de confianza y los genes que sostienen la decisión.
+    </p>
+
+    <div class="demo-actions">
+      <a href="https://oncolens-wkuy.onrender.com" target="_blank" rel="noopener" class="btn-primary btn-lg" id="demoLink"></a>
+        Abrir la demo
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="#" class="btn-ghost" id="repoLink">Ver el código en GitHub</a>
+>>>>>>> a7367771d560cf7d753841070c2ab8218917c2db
     </div>
 
     <div class="method-grid">
@@ -765,6 +843,7 @@
         </div>
       </article>
 
+<<<<<<< HEAD
       <!-- ---- Integrante 4 ---- -->
       <article class="member">
         <div class="member-photo">
@@ -804,11 +883,150 @@
         <h3>OncoLens</h3>
       </div>
 
+=======
+<!-- ============================================================
+     EQUIPO
+     ============================================================ -->
+<section class="sec sec-alt" id="equipo">
+  <div class="sec-head">
+    <span class="sec-tag">07 — Equipo</span>
+    <h2>Quiénes han participado en este proyecto</h2>
+    <p class="sec-lead">
+      Proyecto final del Bootcamp de Data Analyst II. Cada integrante trabajó una parte del
+      pipeline, del análisis exploratorio al despliegue.
+    </p>
+  </div>
+
+  <div class="team">
+
+    <!-- ---- Integrante 1 ---- -->
+    <article class="member">
+      <div class="member-photo">
+          <img src="assets/img/alejandragarciaduque.jpeg" alt="Foto de Alejandra Duque García">
+        <span class="photo-initials">NA</span>
+      </div>
+      <h4>Alejandra Duque García</h4>
+      <!--<span class="member-role">Rol en el proyecto</span>-->
+      <p class="member-bio">
+        Profesional con 10 años de gestión en el sector social reconvirtiendo su perfil hacia el Análisis de Datos. Aporto madurez profesional y visión crítica para traducir la complejidad humana e informativa en soluciones analíticas y decisiones basadas en evidencia.
+      </p>
+      <div class="member-links">
+        <!--<a href="#" target="_blank" rel="noopener" aria-label="Portfolio">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M2 4.5h12M2 8h12M2 11.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Portfolio
+        </a>-->
+        <a href="https://github.com/ALEJANDRADG2612" target="_blank" rel="noopener" aria-label="GitHub">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/aduquegarcia" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+    </article>
+
+    <!-- ---- Integrante 2 ---- -->
+    <article class="member">
+      <div class="member-photo">
+        <span class="photo-initials">NA</span>
+      </div>
+      <h4>Noelia Sánchez Fácila</h4>
+      <!--<span class="member-role">Rol en el proyecto</span>-->
+      <p class="member-bio">
+        Soy <span style="font-weight: bold;">Data Scientist</span> especializada en Inteligencia Artificial y Machine Learning, con una visión orientada a transformar datos en soluciones útiles y accesibles. Mi trayectoria combina el desarrollo tecnológico con una sólida experiencia en formación y comunicación, lo que me permite diseñar herramientas que no solo resuelven problemas complejos, sino que también facilitan su interpretación por parte de los usuarios. Me apasiona construir aplicaciones basadas en datos que generen un impacto real y acerquen la IA a las personas.
+      </p>
+      <div class="member-links">
+        <a href="https://nsfacila.github.io/portfolio/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M2 4.5h12M2 8h12M2 11.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Portfolio
+        </a>
+        <a href="https://github.com/nsfacila" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/noelia-sánchez-fácila" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+    </article>
+
+    <!-- ---- Integrante 3 ---- -->
+    <article class="member">
+      <div class="member-photo">
+        <!--<span class="member-role">Rol en el proyecto</span>-->
+        <img src="assets/img/rominanavea.png" alt="">
+      </div>
+      <h4>Romina Navea Rodríguez</h4>
+      <!--<span class="member-role">Rol en el proyecto</span>-->
+      <p class="member-bio">
+        Analista de datos en formación, con una trayectoria previa en comunicación estratégica y analítica digital. Me apasiona el proceso de convertir datos en información comprensible y útil para la toma de decisiones, algo que he trabajado desde distintos ángulos a lo largo de mi carrera. Mi valor diferencial está en combinar la capacidad técnica con la habilidad de comunicar resultados de forma clara a cualquier tipo de equipo o audiencia.
+      </p>
+      <div class="member-links">
+        <a href="https://rnavea-r.github.io/portafolio-romina-navea-rodriguez/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M2 4.5h12M2 8h12M2 11.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Portfolio
+        </a>
+        <a href="https://github.com/rnavea-r " target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/romina-navearod/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+    </article>
+
+    <!-- ---- Integrante 4 ---- -->
+    <article class="member">
+      <div class="member-photo">
+        <!--<span class="photo-initials">NA</span>-->
+        <img src="assets/img/carnetyasirablanco.JPG" alt="">
+      </div>
+      <h4>Yasira Blanco Moreno</h4>
+      <!--<span class="member-role">Rol en el proyecto</span>-->
+      <p class="member-bio">
+        Analista de datos con vocación investigadora. Exploro la intersección entre neurociencia, psicología y análisis cuantitativo, con la convicción de que las mejores respuestas nacen de la evidencia bien mirada.      </p>
+      <div class="member-links">
+        <a href="https://cornerlab.me" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M2 4.5h12M2 8h12M2 11.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Portfolio
+        </a>
+        <a href="https://github.com/Onmyblasi" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/yasira-blanco-moreno" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+
+<footer>
+  <!-- SECCIÓN 1: OncoSeq Explorer + Navegación -->
+  <div class="foot-section-1">
+    <div class="foot-inner-section1">
+      
+      <!-- Título OncoSeq Explorer -->
+      <div class="foot-title-center">
+        <h3>OncoSeq Explorer</h3>
+      </div>
+
+      <!-- Descripción del proyecto -->
+>>>>>>> a7367771d560cf7d753841070c2ab8218917c2db
       <p class="foot-description">
         Proyecto académico · Bootcamp Data Analyst II · 2026<br>
         Datos: The Cancer Genome Atlas (TCGA), acceso público.
       </p>
 
+<<<<<<< HEAD
       <div class="foot-nav-section">
         <h4 class="foot-section-title">Navegación</h4>
         <div class="foot-nav-links">
@@ -816,6 +1034,18 @@
           <button type="button" data-tab="datos">Los datos</button>
           <button type="button" data-tab="metodo">Cómo funciona</button>
           <button type="button" data-tab="equipo">Equipo</button>
+=======
+      <!-- Navegación -->
+      <div class="foot-nav-section">
+        <h4 class="foot-section-title">Navegación</h4>
+        <div class="foot-nav-links">
+          <a href="#biologia">Biología</a>
+          <a href="#datos">Los datos</a>
+          <a href="#metodo">Cómo funciona</a>
+          <a href="#hallazgos">Hallazgos</a>
+          <a href="#limitaciones">Límites</a>
+          <a href="#equipo">Equipo</a>
+>>>>>>> a7367771d560cf7d753841070c2ab8218917c2db
         </div>
       </div>
 
@@ -826,11 +1056,20 @@
 
   <!-- SECCIÓN 2: Bootcamp Data Analyst II -->
   <div class="foot-section-2">
+<<<<<<< HEAD
 
+=======
+    
+    <!-- Título centrado del bootcamp -->
+>>>>>>> a7367771d560cf7d753841070c2ab8218917c2db
     <div class="foot-title-center">
       <h3>Bootcamp Data Analyst II</h3>
     </div>
 
+<<<<<<< HEAD
+=======
+    <!-- Bloque 1: Don Bosco -->
+>>>>>>> a7367771d560cf7d753841070c2ab8218917c2db
     <div class="foot-institution">
       <div class="inst-logo">
         <img src="assets/img/logo-donbosco.svg" alt="Logo Fundación Don Bosco" loading="lazy">
@@ -842,6 +1081,10 @@
       </div>
     </div>
 
+<<<<<<< HEAD
+=======
+    <!-- Bloque 2: Factoría F5 y Somos F5 -->
+>>>>>>> a7367771d560cf7d753841070c2ab8218917c2db
     <div class="foot-institution">
       <div class="inst-logos-stack">
         <div class="inst-logo">
@@ -862,6 +1105,10 @@
       </div>
     </div>
 
+<<<<<<< HEAD
+=======
+    <!-- Bloque 3: La Caixa -->
+>>>>>>> a7367771d560cf7d753841070c2ab8218917c2db
     <div class="foot-institution">
       <div class="inst-logo">
         <img src="assets/img/logo-lacaixa.svg" alt="Logo Fundación La Caixa" loading="lazy">
@@ -877,7 +1124,11 @@
 
     <div class="foot-bottom">
       <p class="foot-copyright">
+<<<<<<< HEAD
         © 2026 OncoLens. Proyecto académico de la Fundación Don Bosco.
+=======
+        © 2026 OncoSeq Explorer. Proyecto académico de la Fundación Don Bosco.
+>>>>>>> a7367771d560cf7d753841070c2ab8218917c2db
       </p>
     </div>
   </div>
