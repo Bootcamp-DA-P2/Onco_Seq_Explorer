@@ -15,28 +15,22 @@
 </head>
 <body>
 
-  <!-- ============================================================
-       NAVBAR - Logo + Navegación
-       ============================================================ -->
-  <nav>
-    <a href="/" class="logo">
-      <img src="assets/img/logo/logo-OncoLens-Lupa-Genomics & Research.png" alt="OncoLens" class="logo-img">
-    </a>
-    <div class="nav-links">
+<nav>
+  <a href="index.html" class="logo">
+    <img src="assets/img/logo/logo-OncoLens-Lupa-Genomics & Research.png"
+         srcset="assets/img/logo-oncolens@2x.png 2x, assets/img/logo-oncolens@3x.png 3x"
+         alt="OncoLens" class="logo-img" width="205" height="56">
+  </a>
+  <div class="nav-links">
       <button type="button" data-tab="que-es">Qué es</button>
       <button type="button" data-tab="datos">Los datos</button>
       <button type="button" data-tab="metodo">Cómo funciona</button>
       <button type="button" data-tab="equipo">Equipo</button>
-      <a href="https://oncolens-wkuy.onrender.com" target="_blank" rel="noopener" class="nav-cta">
-        Abrir la demo
-      </a>
-    </div>
-  </nav>
+    <a href="https://oncolens-wkuy.onrender.com" target="_blank" rel="noopener" class="nav-cta">Abrir la demo</a>
+  </div>
+</nav>
 
-  <!-- ============================================================
-       HERO SECTION
-       ============================================================ -->
-  <section class="hero">
+<section class="hero">
     <div class="hero-top">
       <div class="hero-text">
         <div class="eyebrow">
@@ -95,393 +89,550 @@
     </div>
   </section>
 
-  <div class="ticker-wrap">
+<div class="ticker-wrap">
     <div class="ticker-track" id="tickerTrack"></div>
-  </div>
+</div>
 
-  <!-- ============================================================
-       BARRA DE PESTAÑAS
-       ============================================================ -->
-  <div class="tabs-bar" id="tabsBar" role="tablist" aria-label="Secciones de OncoLens">
+<!-- ============================================================
+     BARRA DE PESTAÑAS
+     ============================================================ -->
+<div class="tabs-bar" id="tabsBar" role="tablist" aria-label="Secciones de OncoLens">
     <button type="button" class="tab-btn" data-tab="que-es" role="tab" aria-selected="true">Qué es</button>
     <button type="button" class="tab-btn" data-tab="datos" role="tab" aria-selected="false">Los datos</button>
     <button type="button" class="tab-btn" data-tab="metodo" role="tab" aria-selected="false">Cómo funciona</button>
+    <button type="button" class="tab-btn" data-tab="demo" role="tab" aria-selected="false">Demo</button>
     <button type="button" class="tab-btn" data-tab="equipo" role="tab" aria-selected="false">Equipo</button>
+</div>
+
+
+<!-- ===== PESTAÑA · QUE-ES ===== -->
+<div class="tab-panel tab-panel-intro" id="panel-que-es" data-tab="que-es" role="tabpanel">
+<section class="sec">
+  <div class="sec-head">
+    <span class="sec-tag">01 — Qué es</span>
+    <h2>Un tumor deja huella en los genes que enciende</h2>
+    <p class="sec-lead">
+      Todas las células del cuerpo tienen los mismos genes, pero cada tejido usa unos pocos.
+      Una célula de próstata y una de pulmón se diferencian en <em>cuáles</em> tiene activos.
+      Cuando una célula se vuelve cancerosa, ese patrón de activación cambia.
+    </p>
   </div>
 
-  <!-- ============================================================
-       PESTAÑA 1 · QUÉ ES EL PROYECTO
-       ============================================================ -->
-  <div class="tab-panel" id="panel-que-es" data-tab="que-es" role="tabpanel">
+  <div class="concept-grid">
+    <article class="concept">
+      <span class="concept-num">01</span>
+      <h3>Expresión génica</h3>
+      <p>
+        Un gen puede estar apagado, encendido a medias o a pleno rendimiento. La
+        <strong>expresión</strong> mide cuánta actividad tiene. Es la diferencia entre tener
+        una receta en el libro y estar cocinándola.
+      </p>
+    </article>
 
-    <section class="sec tab-panel-intro">
-      <div class="sec-head">
-        <span class="sec-tag">01 — Qué es el proyecto</span>
-        <h2>OncoLens: qué es y para qué sirve</h2>
-        <p class="sec-lead">
-          Un tumor no aparece de la nada: deja una huella en los genes que activa.
-          OncoLens lee esa huella. A partir del perfil de expresión génica de una
-          muestra de tejido, dice primero si es tumoral o sano, y si es tumoral,
-          de qué órgano proviene.
-        </p>
+    <article class="concept">
+      <span class="concept-num">02</span>
+      <h3>RNA-Seq</h3>
+      <p>
+        La técnica que lee esa actividad. Secuencia el ARN mensajero de una muestra y devuelve
+        un número por cada gen: <strong>20.531 valores</strong> que describen qué está haciendo
+        ese tejido en ese momento.
+      </p>
+    </article>
+
+    <article class="concept">
+      <span class="concept-num">03</span>
+      <h3>Firma tumoral</h3>
+      <p>
+        El tejido canceroso altera su patrón de expresión: activa genes de división celular,
+        silencia frenos. Esa desviación respecto al tejido sano del mismo órgano es lo que
+        el modelo aprende a reconocer.
+      </p>
+    </article>
+  </div>
+
+  <div class="gene-example">
+    <div class="gene-example-text">
+      <span class="micro-tag">EJEMPLO REAL DEL DATASET</span>
+      <h3>KLK3, el gen del PSA</h3>
+      <p>
+        Produce el antígeno prostático específico. Se expresa masivamente en próstata y
+        prácticamente en ningún otro tejido. En nuestros datos, su valor medio en muestras
+        de próstata es <strong>18,19</strong>; en el resto de cohortes no llega a 3.
+      </p>
+      <p class="gene-note">
+        En escala log2, esa diferencia equivale a unas 30.000 veces más expresión. Los
+        marcadores tejido-específicos son así de contundentes.
+      </p>
+    </div>
+
+    <div class="gene-bars">
+      <div class="gbar"><span class="gbar-label">PRAD</span><div class="gbar-track"><div class="gbar-fill hi" style="width:100%"></div></div><span class="gbar-val">18,19</span></div>
+      <div class="gbar"><span class="gbar-label">COAD</span><div class="gbar-track"><div class="gbar-fill" style="width:16%"></div></div><span class="gbar-val">2,98</span></div>
+      <div class="gbar"><span class="gbar-label">BRCA</span><div class="gbar-track"><div class="gbar-fill" style="width:9%"></div></div><span class="gbar-val">1,62</span></div>
+      <div class="gbar"><span class="gbar-label">KIRC</span><div class="gbar-track"><div class="gbar-fill" style="width:4%"></div></div><span class="gbar-val">0,78</span></div>
+      <div class="gbar"><span class="gbar-label">LUAD</span><div class="gbar-track"><div class="gbar-fill" style="width:2%"></div></div><span class="gbar-val">0,43</span></div>
+    </div>
+  </div>
+</section>
+<section class="sec">
+  <div class="sec-head">
+    <span class="sec-tag">SUS LÍMITES</span>
+    <h2>Lo que este sistema no puede hacer</h2>
+    <p class="sec-lead">
+      Un modelo con métricas altas sigue teniendo fronteras. Estas son las nuestras, y forman
+      parte del resultado tanto como los aciertos.
+    </p>
+  </div>
+
+  <div class="limits">
+    <article class="limit">
+      <h4>No sustituye al patólogo</h4>
+      <p>
+        El diagnóstico de cáncer se establece por histopatología. El perfil molecular es una
+        capa complementaria que informa sobre tratamiento y pronóstico, no un reemplazo del
+        microscopio.
+      </p>
+    </article>
+
+    <article class="limit">
+      <h4>Cinco tipos, no todos</h4>
+      <p>
+        El sistema solo conoce mama, riñón, pulmón, próstata y colon. Ante un tumor de otro
+        órgano devolvería una de esas cinco etiquetas, necesariamente equivocada.
+      </p>
+    </article>
+
+    <article class="limit">
+      <h4>Población no representativa</h4>
+      <p>
+        TCGA recoge mayoritariamente población estadounidense. La generalización a otras
+        poblaciones no está validada.
+      </p>
+    </article>
+
+    <article class="limit">
+      <h4>Un 2% de tumores se escapa</h4>
+      <p>
+        El cribado inicial clasifica como sanas unas 6 de cada 300 muestras tumorales. En una
+        cascada, ese error no se recupera aguas abajo.
+      </p>
+    </article>
+  </div>
+</section>
+</div>
+
+<!-- ===== PESTAÑA · DATOS ===== -->
+<div class="tab-panel tab-panel-intro" id="panel-datos" data-tab="datos" role="tabpanel" hidden>
+<section class="sec sec-alt">
+  <div class="sec-head">
+    <span class="sec-tag">02 — Los datos</span>
+    <h2>1.680 muestras del Cancer Genome Atlas</h2>
+    <p class="sec-lead">
+      TCGA es un proyecto público de los Institutos Nacionales de Salud de Estados Unidos que
+      ha perfilado molecularmente miles de tumores. Trabajamos con cinco cohortes y, en cada
+      una, tanto tejido tumoral como tejido sano adyacente.
+    </p>
+  </div>
+
+  <div class="cohort-table">
+    <div class="cohort-row cohort-head">
+      <span>Cohorte</span><span>Órgano</span><span class="num">Tumor</span><span class="num">Sano</span><span class="num">Total</span>
+    </div>
+    <div class="cohort-row"><span class="c-code">BRCA</span><span>Mama</span><span class="num">448</span><span class="num">112</span><span class="num">560</span></div>
+    <div class="cohort-row"><span class="c-code">KIRC</span><span>Riñón</span><span class="num">288</span><span class="num">72</span><span class="num">360</span></div>
+    <div class="cohort-row"><span class="c-code">LUAD</span><span>Pulmón</span><span class="num">236</span><span class="num">59</span><span class="num">295</span></div>
+    <div class="cohort-row"><span class="c-code">PRAD</span><span>Próstata</span><span class="num">208</span><span class="num">52</span><span class="num">260</span></div>
+    <div class="cohort-row"><span class="c-code">COAD</span><span>Colon</span><span class="num">164</span><span class="num">41</span><span class="num">205</span></div>
+    <div class="cohort-row cohort-total"><span>Total</span><span></span><span class="num">1.344</span><span class="num">336</span><span class="num">1.680</span></div>
+  </div>
+
+  <div class="data-notes">
+    <article class="note">
+      <span class="micro-tag">OBSERVACIÓN</span>
+      <h4>El desbalance es de diseño</h4>
+      <p>
+        La proporción tumor/sano es exactamente 80/20 en las cinco cohortes, hasta el decimal.
+        En datos clínicos reales esa cifra varía según el margen quirúrgico y el protocolo de
+        cada hospital. Aquí está forzada, así que las probabilidades del modelo no deben
+        leerse como riesgo poblacional.
+      </p>
+    </article>
+
+    <article class="note">
+      <span class="micro-tag">RIESGO DETECTADO</span>
+      <h4>320 pacientes aparecen dos veces</h4>
+      <p>
+        Hay 1.680 muestras pero solo 1.360 donantes: 320 personas aportaron su tumor
+        <em>y</em> su tejido sano. Repartirlos al azar entre entrenamiento y prueba haría que
+        el modelo reconociera al paciente en lugar del cáncer.
+      </p>
+    </article>
+  </div>
+</section>
+</div>
+
+<!-- ===== PESTAÑA · METODO ===== -->
+<div class="tab-panel tab-panel-intro" id="panel-metodo" data-tab="metodo" role="tabpanel" hidden>
+<section class="sec">
+  <div class="sec-head">
+    <span class="sec-tag">03 — Cómo funciona</span>
+    <h2>Dos modelos, en cascada</h2>
+    <p class="sec-lead">
+      Separar el problema en dos decisiones encadenadas hace el sistema auditable: cada etapa
+      se entrena, se mide y se explica por separado. Es también el orden en que razona un
+      laboratorio — primero confirmar malignidad, después tipificar.
+    </p>
+  </div>
+
+  <div class="cascade">
+    <div class="casc-node casc-input">
+      <span class="casc-eyebrow">ENTRADA</span>
+      <strong>Muestra RNA-Seq</strong>
+      <span class="casc-sub">20.531 valores de expresión</span>
+    </div>
+
+    <div class="casc-arrow" aria-hidden="true"></div>
+
+    <div class="casc-node casc-m1">
+      <span class="casc-eyebrow">MODELO 1 · BINARIO</span>
+      <strong>¿Tumoral o sano?</strong>
+      <div class="casc-metric"><span>F1-macro</span><b>0,974</b></div>
+      <div class="casc-metric"><span>Recall tejido sano</span><b>1,00</b></div>
+    </div>
+
+    <div class="casc-split" aria-hidden="true"></div>
+
+    <div class="casc-branches">
+      <div class="casc-node casc-end">
+        <span class="casc-eyebrow">SANO</span>
+        <strong>Fin del proceso</strong>
+        <span class="casc-sub">No se tipifica</span>
       </div>
 
-      <div class="concept-grid">
-        <article class="concept">
-          <span class="concept-num">01</span>
-          <h3>Pregunta de investigación</h3>
-          <p>
-            ¿Puede la expresión génica de una muestra de RNA-Seq distinguir tejido
-            tumoral de tejido sano, y clasificar correctamente su
-            <strong>órgano de origen</strong>?
-          </p>
-        </article>
-
-        <article class="concept">
-          <span class="concept-num">02</span>
-          <h3>El problema</h3>
-          <p>
-            Determinar el origen de un tumor es hoy trabajo de la histopatología, y
-            en casos ambiguos el margen de duda es real. Un perfil molecular no la
-            reemplaza, pero puede ser una <strong>segunda capa de evidencia</strong>,
-            más rápida y basada en datos.
-          </p>
-        </article>
-
-        <article class="concept">
-          <span class="concept-num">03</span>
-          <h3>Para quién es</h3>
-          <p>
-            Para quien quiera entender cómo el aprendizaje automático se aplica a
-            datos genómicos: estudiantes, investigadores, y cualquier persona
-            curiosa por esta intersección entre <strong>biología y ciencia de
-            datos</strong>.
-          </p>
-        </article>
+      <div class="casc-node casc-m2">
+        <span class="casc-eyebrow">MODELO 2 · 5 CLASES</span>
+        <strong>¿Qué órgano de origen?</strong>
+        <div class="casc-metric"><span>F1-macro (hold-out)</span><b>1,00</b></div>
+        <div class="casc-metric"><span>Clases</span><b>BRCA · KIRC · LUAD · PRAD · COAD</b></div>
       </div>
+    </div>
+  </div>
 
-      <div class="callout">
-        <span class="micro-tag">LO QUE NO ES</span>
+  <div class="method-grid">
+    <article class="mcard">
+      <h4>Partición por paciente</h4>
+      <p>
+        Todas las muestras de un mismo donante van al mismo lado de la partición. Con
+        <code>StratifiedGroupKFold</code> verificamos 0 pacientes compartidos entre
+        entrenamiento y prueba, frente a los 107 que se partían con una división aleatoria.
+      </p>
+    </article>
+
+    <article class="mcard">
+      <h4>Métricas honestas</h4>
+      <p>
+        Con clases 80/20, un modelo que dijera siempre «tumor» acertaría el 80%. Por eso
+        medimos F1-macro, recall por clase y AUC, nunca la accuracy sola.
+      </p>
+    </article>
+
+    <article class="mcard">
+      <h4>Modelo interpretable</h4>
+      <p>
+        Regresión logística frente a Random Forest y XGBoost. Iguala o supera a ambos, entrena
+        8 veces más rápido y sus coeficientes indican qué genes pesan en cada decisión.
+      </p>
+    </article>
+  </div>
+
+  <div class="callout">
+    <span class="micro-tag">LIMITACIÓN DE LA ARQUITECTURA</span>
+    <p>
+      El Modelo 2 solo actúa sobre lo que el Modelo 1 marca como tumor. Un 2% de los tumores
+      se clasifican como sanos y <strong>nunca llegan a la segunda etapa</strong>: el error de
+      la primera fase no es recuperable. Por eso el recall de la clase tumoral es la métrica
+      crítica de todo el sistema.
+    </p>
+  </div>
+</section>
+<section class="sec sec-alt">
+  <div class="sec-head">
+    <span class="sec-tag">04 — Hallazgos</span>
+    <h2>Lo que encontramos al auditar los datos</h2>
+    <p class="sec-lead">
+      Entrenar el modelo fue la parte rápida. Lo interesante apareció al preguntarnos por qué
+      los números eran los que eran.
+    </p>
+  </div>
+
+  <div class="findings">
+
+    <article class="finding">
+      <div class="finding-figure">
+        <div class="donut" style="--pct: 88.7">
+          <span class="donut-num">88,7<small>%</small></span>
+        </div>
+        <span class="finding-cap">de los 256 genes silenciados son ARN no codificante</span>
+      </div>
+      <div class="finding-body">
+        <span class="micro-tag">GENES SILENCIADOS</span>
+        <h3>No están apagados: la técnica no puede verlos</h3>
         <p>
-          <strong>OncoLens no es una herramienta diagnóstica.</strong> Es un
-          proyecto académico, de apoyo a la investigación. Sus resultados no
-          constituyen un diagnóstico médico ni sustituyen la valoración de un
-          profesional sanitario.
+          256 genes valen cero en las 1.680 muestras. Al recuperar sus nombres reales
+          descubrimos que 229 son ARN pequeños no codificantes — snoRNA, snRNA, scaRNA.
+        </p>
+        <p>
+          El RNA-Seq estándar captura moléculas con cola poli-A. Estos ARN no la tienen, así
+          que el protocolo los descarta antes de secuenciar. <strong>No es un hallazgo
+          biológico: es la huella de una limitación del instrumento.</strong>
+        </p>
+        <p class="finding-note">
+          El resto son genes de testículo, cromosoma Y, piel y pelo: tejidos que no están en
+          el dataset. Verificado de forma independiente con la anotación del NCBI.
         </p>
       </div>
+    </article>
 
-      <div class="subsec-head">
-        <span class="sec-tag">SUS LÍMITES, CON LA MISMA HONESTIDAD</span>
-        <h3>Lo que este sistema no puede hacer</h3>
+    <article class="finding finding-reverse">
+      <div class="finding-figure">
+        <div class="ba">
+          <div class="ba-col">
+            <span class="ba-head bad">Antes</span>
+            <ul class="ba-list">
+              <li class="g-noise">RPS4Y1</li>
+              <li class="g-noise">DDX3Y</li>
+              <li class="g-noise">KDM5D</li>
+              <li class="g-noise">USP9Y</li>
+              <li class="g-noise">EIF1AY</li>
+            </ul>
+            <span class="ba-foot">genes de sexo</span>
+          </div>
+          <div class="ba-col">
+            <span class="ba-head good">Después</span>
+            <ul class="ba-list">
+              <li class="g-signal">KLK3</li>
+              <li class="g-signal">SFTPB</li>
+              <li class="g-signal">KLK2</li>
+              <li class="g-noise">RPS4Y1</li>
+              <li class="g-signal">CEACAM5</li>
+            </ul>
+            <span class="ba-foot">marcadores tumorales</span>
+          </div>
+        </div>
+        <span class="finding-cap">Top 5 genes por varianza, antes y después de la corrección</span>
       </div>
-
-      <div class="limits">
-        <article class="limit">
-          <h4>Cinco tipos, no todos</h4>
-          <p>
-            El sistema solo conoce mama, riñón, pulmón, próstata y colon. Ante un
-            tumor de otro órgano devolvería una de esas cinco etiquetas,
-            necesariamente equivocada.
-          </p>
-        </article>
-
-        <article class="limit">
-          <h4>Población no representativa</h4>
-          <p>
-            TCGA es mayormente población estadounidense. La generalización a otras
-            etnias y geografías no está validada.
-          </p>
-        </article>
-
-        <article class="limit">
-          <h4>No sustituye al patólogo</h4>
-          <p>
-            El diagnóstico se establece por histopatología. OncoLens es una capa
-            molecular complementaria, nunca un reemplazo.
-          </p>
-        </article>
-
-        <article class="limit">
-          <h4>Datos limitados de tejido sano</h4>
-          <p>
-            El desbalance 80/20 (tumor/sano) afecta la especificidad. Con más
-            muestras de tejido sano, el modelo sería más robusto.
-          </p>
-        </article>
-      </div>
-
-    </section>
-
-  </div>
-
-  <!-- ============================================================
-       PESTAÑA 2 · LOS DATOS
-       ============================================================ -->
-  <div class="tab-panel" id="panel-datos" data-tab="datos" role="tabpanel" hidden>
-
-    <section class="sec tab-panel-intro">
-      <div class="sec-head">
-        <span class="sec-tag">02 — Los datos</span>
-        <h2>TCGA: 1.680 muestras de 5 cohortes</h2>
-        <p class="sec-lead">
-          The Cancer Genome Atlas es un proyecto público de los Institutos Nacionales
-          de Salud que ha perfilado molecularmente miles de tumores reales.
+      <div class="finding-body">
+        <span class="micro-tag">UN BUG SILENCIOSO</span>
+        <h3>Una transformación de más cambiaba toda la biología</h3>
+        <p>
+          Los datos ya venían en escala logarítmica, pero una función del análisis exploratorio
+          volvía a aplicarla. El resultado no daba ningún error: simplemente comprimía los
+          valores hasta aplastar las diferencias reales entre genes.
+        </p>
+        <p>
+          Sobrevivían solo los genes de patrón binario — los del cromosoma Y, que se tienen o
+          no según el sexo. <strong>El ranking de genes más informativos era, en realidad, una
+          lista de genes de sexo.</strong>
+        </p>
+        <p class="finding-note">
+          Lo detectamos contrastando el resultado con la biología conocida: si KLK3 no aparece
+          arriba en un dataset con 260 muestras de próstata, algo va mal.
         </p>
       </div>
+    </article>
 
-      <div class="data-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Cohorte</th>
-              <th>Órgano</th>
-              <th>Tumor</th>
-              <th>Sano</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>BRCA</td>
-              <td>Mama</td>
-              <td>448</td>
-              <td>112</td>
-              <td>560</td>
-            </tr>
-            <tr>
-              <td>KIRC</td>
-              <td>Riñón</td>
-              <td>288</td>
-              <td>72</td>
-              <td>360</td>
-            </tr>
-            <tr>
-              <td>LUAD</td>
-              <td>Pulmón</td>
-              <td>236</td>
-              <td>59</td>
-              <td>295</td>
-            </tr>
-            <tr>
-              <td>PRAD</td>
-              <td>Próstata</td>
-              <td>208</td>
-              <td>52</td>
-              <td>260</td>
-            </tr>
-            <tr>
-              <td>COAD</td>
-              <td>Colon</td>
-              <td>164</td>
-              <td>41</td>
-              <td>205</td>
-            </tr>
-            <tr class="total-row">
-              <td colspan="2"><strong>Total</strong></td>
-              <td><strong>1.344</strong></td>
-              <td><strong>336</strong></td>
-              <td><strong>1.680</strong></td>
-            </tr>
-          </tbody>
-        </table>
+    <article class="finding">
+      <div class="finding-figure">
+        <div class="spread">
+          <div class="spread-bar">
+            <div class="spread-top" style="width:0.6%"></div>
+          </div>
+          <div class="spread-legend">
+            <div><b>0,6 %</b><span>peso de los 15 genes principales</span></div>
+            <div><b>5.214</b><span>genes que aportan al modelo</span></div>
+          </div>
+        </div>
+        <span class="finding-cap">Distribución del peso entre los coeficientes del modelo</span>
       </div>
-
-      <div class="subsec-head">
-        <span class="sec-tag">LA MEDIDA: RNA-SEQ</span>
-        <h3>20.531 genes por muestra</h3>
-      </div>
-
-      <p>
-        RNA-Seq es la técnica de laboratorio que mide cuáles genes están activos.
-        Extrae ARN mensajero de la muestra, lo secuencia, y cuenta cuántas copias hay
-        de cada gen. El resultado es un perfil molecular único — la firma de ese tejido.
-      </p>
-
-    </section>
-
-  </div>
-
-  <!-- ============================================================
-       PESTAÑA 3 · CÓMO FUNCIONA
-       ============================================================ -->
-  <div class="tab-panel" id="panel-metodo" data-tab="metodo" role="tabpanel" hidden>
-
-    <section class="sec tab-panel-intro">
-      <div class="sec-head">
-        <span class="sec-tag">03 — Cómo funciona</span>
-        <h2>Arquitectura en cascada</h2>
-        <p class="sec-lead">
-          OncoLens utiliza dos modelos encadenados. Primero detecta si el tejido es
-          tumoral o sano. Si es tumoral, el segundo modelo identifica el órgano de origen.
+      <div class="finding-body">
+        <span class="micro-tag">CÓMO DECIDE EL MODELO</span>
+        <h3>Una firma difusa, no unos pocos marcadores</h3>
+        <p>
+          Esperábamos encontrar oncogenes conocidos dominando la decisión. En su lugar, los
+          quince genes más influyentes suman apenas el 0,6% del peso total, y más de cinco mil
+          genes contribuyen de forma apreciable.
+        </p>
+        <p>
+          El modelo no detecta «los genes del cáncer»: <strong>suma miles de diferencias
+          pequeñas repartidas por todo el transcriptoma.</strong> Eso explica su precisión
+          (AUC 0,996) y también su límite.
+        </p>
+        <p class="finding-note">
+          Consecuencia honesta: los genes del ranking tienen relevancia estadística, no
+          necesariamente causal. No podemos señalar cinco genes y decir que provocan el tumor.
         </p>
       </div>
-
-      <div class="subsec-head">
-        <h3>Modelo 1: ¿Tumoral o sano?</h3>
-      </div>
-
-      <p>
-        Regresión logística entrenada con validación cruzada estratificada. Recall:
-        0,98 — el 2% de tumores se clasifican erróneamente como sanos. Es la métrica
-        crítica del sistema.
-      </p>
-
-      <div class="subsec-head">
-        <h3>Modelo 2: ¿Qué órgano?</h3>
-      </div>
-
-      <p>
-        Clasificación multiclase (5 tipos). F1-macro: 1,00 en validación. No es
-        perfección real — es que los órganos dejan firmas muy distintas en el transcriptoma.
-      </p>
-
-      <div class="subsec-head">
-        <h3>¿Por qué Regresión Logística?</h3>
-      </div>
-
-      <div class="comparison">
-        <article>
-          <h4>Regresión Logística</h4>
-          <p><strong>F1:</strong> 0,974 | <strong>Velocidad:</strong> 8x más rápido | <strong>Interpretabilidad:</strong> Perfecta</p>
-        </article>
-        <article>
-          <h4>Random Forest</h4>
-          <p><strong>F1:</strong> 0,972 | <strong>Velocidad:</strong> Lento | <strong>Interpretabilidad:</strong> Black box</p>
-        </article>
-        <article>
-          <h4>XGBoost</h4>
-          <p><strong>F1:</strong> 0,969 | <strong>Velocidad:</strong> Lento | <strong>Interpretabilidad:</strong> Black box</p>
-        </article>
-      </div>
-
-      <p>
-        Elegimos lo más útil, no lo más sofisticado. Sus coeficientes nos dicen exactamente
-        qué genes pesan en cada decisión.
-      </p>
-
-    </section>
+    </article>
 
   </div>
+</section>
+</div>
 
-  <!-- ============================================================
-       PESTAÑA 4 · EQUIPO
-       ============================================================ -->
-  <div class="tab-panel" id="panel-equipo" data-tab="equipo" role="tabpanel" hidden>
+<!-- ===== PESTAÑA · DEMO ===== -->
+<div class="tab-panel tab-panel-intro" id="panel-demo" data-tab="demo" role="tabpanel" hidden>
+<section class="sec sec-demo">
+  <div class="demo-inner">
+    <span class="sec-tag light">05 — Demo</span>
+    <h2>Pruébalo con una muestra</h2>
+    <p class="demo-lead">
+      Sube un perfil de expresión y observa el recorrido completo: cribado tumoral, tipificación
+      del órgano de origen, nivel de confianza y los genes que sostienen la decisión.
+    </p>
 
-    <section class="sec tab-panel-intro">
-      <div class="sec-head">
-        <span class="sec-tag">04 — Equipo</span>
-        <h2>Cuatro data analysts del Bootcamp</h2>
-        <p class="sec-lead">
-          OncoLens fue construido por un equipo pequeño, cada integrante trabajó
-          en distintas partes del pipeline — desde análisis exploratorio hasta despliegue.
-        </p>
-      </div>
+    <div class="demo-actions">
+      <a href="https://oncolens-wkuy.onrender.com" target="_blank" rel="noopener" class="btn-primary btn-lg" id="demoLink">
+        Abrir la demo
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="https://github.com/bootcamp-da-p2/Onco_Seq_Explorer" target="_blank" rel="noopener" class="btn-ghost" id="repoLink">Ver el código en GitHub</a>
+    </div>
 
-      <div class="members-grid">
+    <div class="demo-disclaimer">
+      <strong>Esta no es una herramienta diagnóstica.</strong>
+      OncoLens es un proyecto académico de apoyo a la investigación. Sus resultados no
+      constituyen un diagnóstico médico ni sustituyen la valoración histopatológica y el
+      criterio de un profesional sanitario.
+    </div>
+  </div>
+</section>
+</div>
 
-        <!-- Integrante 1 -->
-        <article class="member">
-          <div class="member-photo">
-            <img src="assets/img/alejandra.jpg" alt="Alejandra Duque García">
-          </div>
-          <h4>Alejandra Duque García</h4>
-          <p class="member-bio">
-            [Descripción corta de Alejandra]
-          </p>
-          <div class="member-links">
-            <a href="#" target="_blank" rel="noopener">
-              <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-              GitHub
-            </a>
-            <a href="#" target="_blank" rel="noopener">
-              <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
-              LinkedIn
-            </a>
-          </div>
-        </article>
-
-        <!-- Integrante 2 -->
-        <article class="member">
-          <div class="member-photo">
-            <img src="assets/img/noelia.jpg" alt="Noelia Sánchez Fácila">
-          </div>
-          <h4>Noelia Sánchez Fácila</h4>
-          <p class="member-bio">
-            Soy Data Scientist especializada en Inteligencia Artificial y Machine Learning, con una visión orientada a transformar datos en soluciones útiles y accesibles.
-          </p>
-          <div class="member-links">
-            <a href="#" target="_blank" rel="noopener">
-              <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-              GitHub
-            </a>
-            <a href="#" target="_blank" rel="noopener">
-              <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
-              LinkedIn
-            </a>
-          </div>
-        </article>
-
-        <!-- Integrante 3 -->
-        <article class="member">
-          <div class="member-photo">
-            <img src="assets/img/romina.jpg" alt="Romina Navea Rodríguez">
-          </div>
-          <h4>Romina Navea Rodríguez</h4>
-          <p class="member-bio">
-            Analista de datos en formación, con una trayectoria previa en comunicación estratégica. Mi valor diferencial está en combinar capacidad técnica con habilidad de comunicación.
-          </p>
-          <div class="member-links">
-            <a href="https://rnavea-r.github.io/portafolio-romina-navea-rodriguez/" target="_blank" rel="noopener">
-              <svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M2 4.5h12M2 8h12M2 11.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              Portfolio
-            </a>
-            <a href="https://github.com/rnavea-r" target="_blank" rel="noopener">
-              <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-              GitHub
-            </a>
-            <a href="https://www.linkedin.com/in/romina-navearod/" target="_blank" rel="noopener">
-              <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
-              LinkedIn
-            </a>
-          </div>
-        </article>
-
-        <!-- Integrante 4 -->
-        <article class="member">
-          <div class="member-photo">
-            <img src="assets/img/carnetyasirablanco.JPG" alt="Yasira Blanco Moreno">
-          </div>
-          <h4>Yasira Blanco Moreno</h4>
-          <p class="member-bio">
-            Analista de datos con vocación investigadora. Exploro la intersección entre neurociencia, psicología y análisis cuantitativo, con la convicción de que las mejores respuestas nacen de la evidencia bien mirada.
-          </p>
-          <div class="member-links">
-            <a href="https://cornerlab.me" target="_blank" rel="noopener">
-              <svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M2 4.5h12M2 8h12M2 11.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              Portfolio
-            </a>
-            <a href="https://github.com/Onmyblasi" target="_blank" rel="noopener">
-              <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-              GitHub
-            </a>
-            <a href="https://www.linkedin.com/in/yasira-blanco-moreno" target="_blank" rel="noopener">
-              <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
-              LinkedIn
-            </a>
-          </div>
-        </article>
-
-      </div>
-
-    </section>
-
+<!-- ===== PESTAÑA · EQUIPO ===== -->
+<div class="tab-panel tab-panel-intro" id="panel-equipo" data-tab="equipo" role="tabpanel" hidden>
+<section class="sec sec-alt">
+  <div class="sec-head">
+    <span class="sec-tag">06 — Equipo</span>
+    <h2>Quiénes lo hemos construido</h2>
+    <p class="sec-lead">
+      Proyecto final del Bootcamp de Data Analyst II. Cada integrante trabajó una parte del
+      pipeline, del análisis exploratorio al despliegue.
+    </p>
   </div>
 
-  <!-- ============================================================
-       FOOTER
-       ============================================================ -->
-  <footer>
+  <div class="team">
+
+    <!-- ---- Integrante 1 ---- -->
+    <article class="member">
+      <div class="member-photo">
+          <img src="assets/img/alejandragarciaduque.jpeg" alt="Foto de Alejandra Duque García">
+        <span class="photo-initials">NA</span>
+      </div>
+      <h4>Alejandra Duque García</h4>
+      <!--<span class="member-role">Rol en el proyecto</span>-->
+      <p class="member-bio">
+        Breve descripción profesional. Formación, especialidad y qué aportas al equipo.
+        Dos o tres líneas para darte valor.
+      </p>
+      <div class="member-links">
+        <!--<a href="#" target="_blank" rel="noopener" aria-label="Portfolio">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M2 4.5h12M2 8h12M2 11.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Portfolio
+        </a>-->
+        <a href="#" target="_blank" rel="noopener" aria-label="GitHub">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a href="#" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+    </article>
+
+    <!-- ---- Integrante 2 ---- -->
+    <article class="member">
+      <div class="member-photo">
+        <span class="photo-initials">NA</span>
+      </div>
+      <h4>Noelia Sánchez Fácila</h4>
+      <!--<span class="member-role">Rol en el proyecto</span>-->
+      <p class="member-bio">
+        Soy <span style="font-weight: bold;">Data Scientist</span> especializada en Inteligencia Artificial y Machine Learning, con una visión orientada a transformar datos en soluciones útiles y accesibles. Mi trayectoria combina el desarrollo tecnológico con una sólida experiencia en formación y comunicación, lo que me permite diseñar herramientas que no solo resuelven problemas complejos, sino que también facilitan su interpretación por parte de los usuarios. Me apasiona construir aplicaciones basadas en datos que generen un impacto real y acerquen la IA a las personas.
+      </p>
+      <div class="member-links">
+        <a href="https://nsfacila.github.io/portfolio/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M2 4.5h12M2 8h12M2 11.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Portfolio
+        </a>
+        <a href="https://github.com/nsfacila" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/noelia-sánchez-fácila" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+    </article>
+
+    <!-- ---- Integrante 3 ---- -->
+    <article class="member">
+      <div class="member-photo">
+        <span class="photo-initials">NA</span>
+      </div>
+      <h4>Romina Navea Rodríguez</h4>
+      <!--<span class="member-role">Rol en el proyecto</span>-->
+      <p class="member-bio">
+        Breve descripción profesional. Formación, especialidad y qué aportas al equipo.
+      </p>
+      <div class="member-links">
+        <a href="https://rnavea-r.github.io/portafolio-romina-navea-rodriguez/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M2 4.5h12M2 8h12M2 11.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Portfolio
+        </a>
+        <a href="https://github.com/rnavea-r" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/romina-navearodriguez" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+    </article>
+
+    <!-- ---- Integrante 4 ---- -->
+    <article class="member">
+      <div class="member-photo">
+        <!--<span class="photo-initials">NA</span>-->
+        <img src="assets/img/carnetyasirablanco.jpg" alt="">
+      </div>
+      <h4>Yasira Blanco Moreno</h4>
+      <!--<span class="member-role">Rol en el proyecto</span>-->
+      <p class="member-bio">
+        Analista de datos con vocación investigadora. Exploro la intersección entre neurociencia, psicología y análisis cuantitativo, con la convicción de que las mejores respuestas nacen de la evidencia bien mirada.      </p>
+      <div class="member-links">
+        <a href="https://cornerlab.me" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M2 4.5h12M2 8h12M2 11.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          cornerlab.me
+        </a>
+        <a href="https://github.com/Onmyblasi" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/yasira-blanco-moreno" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.9 13.4H2.9V6h2zM3.9 5.1a1.16 1.16 0 110-2.32 1.16 1.16 0 010 2.32zM13.4 13.4h-2V9.6c0-.9-.02-2.07-1.26-2.07-1.26 0-1.45.98-1.45 2v3.87h-2V6h1.92v.9h.03c.27-.5.92-1.04 1.9-1.04 2.03 0 2.4 1.34 2.4 3.07z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+    </article>
+
+  </div>
+</section>
+</div>
+
+
+<footer>
     <div class="foot-section-1">
       <div class="foot-inner-section1">
         <div class="foot-title-center">
@@ -497,6 +648,7 @@
             <button type="button" data-tab="que-es">Qué es</button>
             <button type="button" data-tab="datos">Los datos</button>
             <button type="button" data-tab="metodo">Cómo funciona</button>
+            <button type="button" data-tab="demo">Demo</button>
             <button type="button" data-tab="equipo">Equipo</button>
           </div>
         </div>
@@ -562,10 +714,9 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
-  <script src="assets/js/molecule-viewer.js"></script>
-  <script src="assets/js/main.js"></script>
-  <script src="assets/js/tabs.js"></script>
+<script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+<script src="assets/js/molecule-viewer.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/tabs.js"></script>
 </body>
 </html>
