@@ -1,0 +1,606 @@
+/* =============================================================
+   STYLES-TOUR.CSS — Modo presentación de OncoLens
+   Mismos tokens que style.css. Tipografía escalada para
+   proyección: cada sección ocupa una pantalla.
+   ============================================================= */
+
+:root {
+  --bg: #FBFDFF;
+  --surface: #FFFFFF;
+  --ink: #0C1E30;
+  --ink-soft: #6B7C8F;
+  --ink-faint: #A6B4C2;
+  --accent: #1652F0;
+  --accent-hover: #0F3FC7;
+  --line: #E7EDF4;
+  --line-strong: #D2DCE8;
+  --data: #14B8B3;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --header-h: 84px;
+  --gutter: 64px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body.tour-page {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* =============================================================
+   CABECERA
+   ============================================================= */
+
+.tour-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--gutter) 0 calc(var(--gutter) + 11px);
+  background: rgba(251, 253, 255, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+  z-index: 100;
+}
+
+.tour-logo img {
+  height: 46px;
+  width: auto;
+  display: block;
+}
+
+.tour-logo:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+  border-radius: 4px;
+}
+
+.tour-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.tour-chapter {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.tour-progress {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  padding: 7px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 100px;
+}
+
+/* =============================================================
+   CONTENEDOR CON SCROLL SNAP
+   ============================================================= */
+
+.tour-container {
+  margin-top: var(--header-h);
+  height: calc(100vh - var(--header-h));
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.tour-container::-webkit-scrollbar { display: none; }
+
+/* =============================================================
+   SECCIONES
+   ============================================================= */
+
+.tour-section {
+  min-height: calc(100vh - var(--header-h));
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  padding: 72px var(--gutter);
+  border-bottom: 1px solid var(--line);
+}
+
+.tour-section:last-child { border-bottom: none; }
+
+.tour-section--surface { background: var(--surface); }
+
+.tour-inner {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* Rejilla de dos columnas: texto + figura */
+.tour-split {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 72px;
+  align-items: center;
+}
+
+.tour-split--figure-left { grid-template-columns: 0.85fr 1.15fr; }
+.tour-split--figure-left .tour-figure { order: -1; }
+
+/* =============================================================
+   TIPOGRAFÍA
+   ============================================================= */
+
+.tour-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 32px;
+}
+
+.tour-eyebrow::before {
+  content: '';
+  width: 34px;
+  height: 1px;
+  background: var(--data);
+  flex-shrink: 0;
+}
+
+.tour-display {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 6vw, 82px);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+}
+
+.tour-display strong {
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.tour-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.9vw, 52px);
+  font-weight: 400;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  margin-bottom: 28px;
+}
+
+.tour-h2 strong { font-weight: 500; color: var(--accent); }
+
+.tour-h3 {
+  font-family: var(--font-display);
+  font-size: clamp(19px, 1.6vw, 23px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+
+.tour-lead {
+  font-size: clamp(17px, 1.5vw, 22px);
+  line-height: 1.62;
+  color: var(--ink-soft);
+  max-width: 62ch;
+}
+
+.tour-lead + .tour-lead { margin-top: 20px; }
+
+.tour-lead strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.tour-lead em {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  color: var(--ink);
+}
+
+.tour-note {
+  margin-top: 34px;
+  padding-left: 20px;
+  border-left: 2px solid var(--line-strong);
+  font-size: clamp(14px, 1.05vw, 16px);
+  line-height: 1.62;
+  color: var(--ink-faint);
+  max-width: 58ch;
+}
+
+/* =============================================================
+   PORTADA
+   ============================================================= */
+
+.tour-cover .tour-display { margin-bottom: 34px; }
+
+.tour-cover-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 44px;
+  margin-top: 56px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+}
+
+.tour-cover-meta div { min-width: 0; }
+
+.tour-cover-meta dt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 7px;
+}
+
+.tour-cover-meta dd {
+  font-family: var(--font-display);
+  font-size: clamp(17px, 1.5vw, 21px);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* =============================================================
+   TARJETAS EN REJILLA (hairline, como en el sitio)
+   ============================================================= */
+
+.tour-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 44px;
+}
+
+.tour-card {
+  background: var(--bg);
+  padding: 34px 30px;
+}
+
+.tour-section--surface .tour-card { background: var(--surface); }
+
+.tour-card-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.11em;
+  color: var(--ink-faint);
+  display: block;
+  margin-bottom: 14px;
+}
+
+.tour-card p {
+  font-size: clamp(14px, 1.05vw, 16px);
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+.tour-card p strong { color: var(--ink); font-weight: 500; }
+
+/* =============================================================
+   PASOS NUMERADOS (RNA-Seq)
+   ============================================================= */
+
+.tour-steps {
+  display: grid;
+  gap: 0;
+  margin-top: 40px;
+}
+
+.tour-step {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 26px;
+  align-items: baseline;
+  padding: 22px 0;
+  border-top: 1px solid var(--line);
+}
+
+.tour-step:last-child { border-bottom: 1px solid var(--line); }
+
+.tour-step-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+}
+
+.tour-step-body h4 {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 1.3vw, 19px);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.tour-step-body p {
+  font-size: clamp(14px, 1.05vw, 16px);
+  line-height: 1.62;
+  color: var(--ink-soft);
+}
+
+/* =============================================================
+   CADENA / FLUJO (ADN → gen → mRNA → número)
+   ============================================================= */
+
+.tour-chain {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 46px;
+  flex-wrap: wrap;
+}
+
+.tour-chain-node {
+  flex: 1 1 150px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 22px 20px;
+  text-align: center;
+}
+
+.tour-section--surface .tour-chain-node { background: var(--bg); }
+
+.tour-chain-node span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 9px;
+}
+
+.tour-chain-node strong {
+  font-family: var(--font-display);
+  font-size: clamp(15px, 1.25vw, 18px);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.tour-chain-node.is-accent { border-color: var(--accent); }
+.tour-chain-node.is-accent strong { color: var(--accent); }
+.tour-chain-node.is-data { border-color: var(--data); }
+.tour-chain-node.is-data strong { color: #0F766E; }
+
+.tour-chain-link {
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  color: var(--line-strong);
+}
+
+/* =============================================================
+   LISTA DE LÍMITES ("lo que no es")
+   ============================================================= */
+
+.tour-limits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 30px 44px;
+  margin-top: 44px;
+}
+
+.tour-limit { border-left: 2px solid var(--line-strong); padding-left: 24px; }
+
+.tour-limit h4 {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 1.3vw, 19px);
+  font-weight: 500;
+  margin-bottom: 9px;
+}
+
+.tour-limit p {
+  font-size: clamp(14px, 1.05vw, 16px);
+  line-height: 1.62;
+  color: var(--ink-soft);
+}
+
+/* =============================================================
+   AVISO DESTACADO
+   ============================================================= */
+
+.tour-callout {
+  margin-top: 44px;
+  background: #FFF7ED;
+  border: 1px solid #FDBA74;
+  border-radius: 10px;
+  padding: 28px 32px;
+  max-width: 900px;
+}
+
+.tour-callout span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #C2410C;
+  margin-bottom: 12px;
+}
+
+.tour-callout p {
+  font-size: clamp(15px, 1.15vw, 17px);
+  line-height: 1.62;
+  color: #7C2D12;
+}
+
+.tour-callout strong { font-weight: 600; }
+
+/* =============================================================
+   FIGURAS
+   ============================================================= */
+
+.tour-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.tour-figure svg { width: 100%; height: auto; max-height: 58vh; }
+
+.tour-figure img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+
+.tour-figcaption {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  text-align: center;
+  line-height: 1.6;
+  max-width: 34ch;
+}
+
+/* =============================================================
+   SECCIÓN FINAL + BOTÓN SIGUIENTE
+   ============================================================= */
+
+.tour-section--end {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.tour-end-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  margin: auto 0;
+}
+
+.tour-end-label {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.tour-end-next {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3vw, 40px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.tour-btn-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 17px 34px;
+  background: var(--accent);
+  color: var(--surface);
+  border: none;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.tour-btn-next:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.tour-btn-next svg { transition: transform 0.25s ease; }
+.tour-btn-next:hover svg { transform: translateX(4px); }
+
+.tour-btn-next:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.tour-hint {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.tour-hint kbd {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  padding: 3px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink-soft);
+}
+
+.tour-footer {
+  width: 100%;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+
+@media (max-width: 1040px) {
+  .tour-split,
+  .tour-split--figure-left {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
+  .tour-split--figure-left .tour-figure { order: 0; }
+  .tour-figure svg { max-height: 36vh; }
+}
+
+@media (max-width: 720px) {
+  :root { --gutter: 24px; --header-h: 68px; }
+
+  .tour-header { padding: 0 var(--gutter); }
+  .tour-logo img { height: 36px; }
+  .tour-chapter { display: none; }
+
+  .tour-section { padding: 48px var(--gutter); }
+  .tour-cover-meta { gap: 20px 28px; }
+  .tour-step { grid-template-columns: 42px 1fr; gap: 16px; }
+  .tour-chain-link { flex-basis: 100%; height: 28px; transform: rotate(90deg); }
+  .tour-btn-next { width: 100%; justify-content: center; }
+  .tour-hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .tour-container { scroll-behavior: auto; }
+  * { animation: none !important; transition: none !important; }
+}

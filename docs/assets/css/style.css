@@ -33,6 +33,48 @@
 
   a { color: inherit; text-decoration: none; }
 
+/* Logo contenedor */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.logo:hover {
+  opacity: 0.85;
+}
+
+.logo:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Imagen del logo — AUMENTADO */
+.logo-img {
+  height: 56px;
+  width: auto;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .logo-img { height: 40px; }
+}
+
+@media (max-width: 480px) {
+  .logo-img { height: 34px; }
+  .logo { gap: 8px; }
+}
+
+
+.logo-mark {
+  display: none;
+}
+
+
   /* ---------- NAV ---------- */
   nav {
     position: relative;
@@ -40,36 +82,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 36px 64px;
-    max-width: 1360px;
-    margin: 0 auto;
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 16px;
-    letter-spacing: 0.01em;
-  }
-
-  .logo-mark {
-    width: 18px;
-    height: 18px;
-    border: 1px solid var(--line-strong);
-    border-radius: 6px;
-    position: relative;
-    flex-shrink: 0;
-  }
-
-  .logo-mark::before {
-    content: '';
-    position: absolute;
-    inset: 5px;
-    background: var(--accent);
-    border-radius: 2px;
+    width: 100%;                    /* Cambiar de max-width a width: 100% */
+    padding: 50px 64px 20px 75px;   /* Cambiar: arriba 50px, izquierda 50px */
+    box-sizing: border-box;         /* Asegurar que padding no estire el ancho */
+    gap: 64px;
   }
 
   .nav-links {
@@ -78,13 +94,17 @@
     gap: 48px;
   }
 
-  .nav-links a {
-    font-size: 13px;
-    font-weight: 400;
-    color: var(--ink-soft);
-    letter-spacing: 0.01em;
-    transition: color 0.2s ease;
-  }
+  .nav-links a,
+.nav-links button[data-tab] {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-soft);
+  letter-spacing: 0.01em;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover,
+.nav-links button[data-tab]:hover { color: var(--ink); }
 
   .nav-links a:hover { color: var(--ink); }
 
@@ -104,9 +124,10 @@
   }
 
   @media (max-width: 720px) {
-    .nav-links a:not(.nav-cta) { display: none; }
-    nav { padding: 28px 24px; }
-  }
+  .nav-links a:not(.nav-cta),
+  .nav-links button[data-tab] { display: none; }
+  nav { padding: 28px 24px 20px 24px; }
+}
 
   /* ---------- HERO ---------- */
   .hero {

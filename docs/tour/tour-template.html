@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OncoLens | Tour</title>
+    <link rel="stylesheet" href="../styles-tour.css">
+</head>
+<body class="tour-page">
+    <!-- HEADER CON LOGO -->
+    <header class="tour-header">
+        <a href="/" class="tour-logo">
+            <img src="../assets/logo/oncoslens-logo.svg" alt="OncoLens">
+        </a>
+        <nav class="tour-nav">
+            <span class="tour-progress">01 / 07</span>
+        </nav>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL CON SCROLL SNAP -->
+    <main class="tour-container">
+        
+        <!-- SECCIÓN 1: Título/Intro -->
+        <section class="tour-section">
+            <div class="tour-section-content">
+                <h1 class="tour-title">01. Introducción</h1>
+                <p class="tour-subtitle">¿Qué es OncoLens y qué hace?</p>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: Contenido principal -->
+        <section class="tour-section">
+            <div class="tour-section-content">
+                <div class="tour-text">
+                    <h2>OncoLens es una aplicación web de machine learning</h2>
+                    <p>Diferencia muestras de tejido obtenidas en una biopsia, entre tejido sano y tejido tumoral, y posteriormente diferencia entre 5 tipos de cáncer: mama, riñón, pulmón, próstata, colon.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: Imagen o contenido adicional -->
+        <section class="tour-section tour-section--image">
+            <div class="tour-section-content">
+                <img src="../assets/images/dna-helix.jpg" alt="Estructura del ADN" class="tour-image">
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: Más contenido -->
+        <section class="tour-section">
+            <div class="tour-section-content">
+                <div class="tour-text">
+                    <h2>¿Cómo funciona?</h2>
+                    <p>El programa está preparado para que se le introduzca un documento xlsx, csv o tsv con la expresión génica RNA-Seq que predice si tiene cáncer o no y qué tipo de entre los 5 con los modelos entrenados.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 5: Footer / CTA Siguiente -->
+        <section class="tour-section tour-section--cta">
+            <div class="tour-section-content tour-cta-container">
+                <button class="tour-btn-next" onclick="nextApartado()">
+                    Siguiente
+                    <svg class="tour-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="tour-footer">
+        <p>&copy; 2026 OncoLens. Bootcamp Data Analyst II</p>
+    </footer>
+
+    <script src="../script-tour.js"></script>
+</body>
+</html>

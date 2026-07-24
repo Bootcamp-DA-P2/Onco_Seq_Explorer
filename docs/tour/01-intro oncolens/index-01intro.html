@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OncoLens · 01 Introducción</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../styles-tour.css">
+</head>
+<body class="tour-page">
+
+<header class="tour-header">
+  <a href="../../index.html" class="tour-logo">
+    <img src="../../assets/img/logo/logo-OncoLens-Lupa-Genomics & Research.png"
+         srcset="../../assets/img/logo-oncolens@2x.png 2x, ../../assets/img/logo-oncolens@3x.png 3x"
+         alt="OncoLens" width="168" height="46">
+  </a>
+  <nav class="tour-nav">
+    <span class="tour-chapter">Introducción</span>
+    <span class="tour-progress">01 / 07</span>
+  </nav>
+</header>
+
+<main class="tour-container">
+
+  <!-- 1 · PORTADA -->
+  <section class="tour-section tour-cover">
+    <div class="tour-inner">
+      <p class="tour-eyebrow">Apartado 01 — Introducción</p>
+      <h1 class="tour-display">Un tumor deja huella <strong>en los genes que activa</strong></h1>
+      <p class="tour-lead">OncoLens lee esa huella.</p>
+      <dl class="tour-cover-meta">
+        <div><dt>Muestras</dt><dd>1.680</dd></div>
+        <div><dt>Genes por muestra</dt><dd>20.531</dd></div>
+        <div><dt>Tipos de tumor</dt><dd>5</dd></div>
+        <div><dt>Fuente</dt><dd>TCGA</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 2 · QUÉ ES -->
+  <section class="tour-section tour-section--surface">
+    <div class="tour-inner">
+      <p class="tour-eyebrow">Qué es y qué hace</p>
+      <h2 class="tour-h2">Una aplicación web que clasifica tejido a partir de su perfil molecular</h2>
+      <p class="tour-lead">OncoLens diferencia muestras de tejido obtenidas en una biopsia entre <strong>tejido sano y tejido tumoral</strong>. Si el tejido es tumoral, distingue después entre <strong>cinco tipos de cáncer</strong>.</p>
+      <div class="tour-grid">
+        <article class="tour-card"><span class="tour-card-num">BRCA</span><p><strong>Mama</strong></p></article>
+        <article class="tour-card"><span class="tour-card-num">KIRC</span><p><strong>Riñón</strong></p></article>
+        <article class="tour-card"><span class="tour-card-num">LUAD</span><p><strong>Pulmón</strong></p></article>
+        <article class="tour-card"><span class="tour-card-num">PRAD</span><p><strong>Próstata</strong></p></article>
+        <article class="tour-card"><span class="tour-card-num">COAD</span><p><strong>Colon</strong></p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · CÓMO FUNCIONA -->
+  <section class="tour-section">
+    <div class="tour-inner">
+      <p class="tour-eyebrow">Cómo funciona</p>
+      <h2 class="tour-h2">Se le entrega un archivo, devuelve una clasificación</h2>
+      <p class="tour-lead">El programa admite un documento <em>xlsx</em>, <em>csv</em> o <em>tsv</em> con la expresión génica RNA-Seq de la muestra. A partir de ahí, dos modelos entrenados en cascada responden en orden.</p>
+      <div class="tour-chain">
+        <div class="tour-chain-node"><span>Entrada</span><strong>Archivo RNA-Seq</strong></div>
+        <div class="tour-chain-link" aria-hidden="true">
+          <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M1 7h17M18 7l-5-5M18 7l-5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="tour-chain-node is-accent"><span>Modelo 1</span><strong>¿Tumoral o sano?</strong></div>
+        <div class="tour-chain-link" aria-hidden="true">
+          <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M1 7h17M18 7l-5-5M18 7l-5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="tour-chain-node is-data"><span>Modelo 2</span><strong>¿De qué órgano?</strong></div>
+      </div>
+      <p class="tour-note">Si el Modelo 1 concluye que el tejido es sano, el proceso termina ahí. Solo las muestras clasificadas como tumorales pasan al Modelo 2.</p>
+    </div>
+  </section>
+
+  <!-- 4 · BIOLOGÍA · EL ADN -->
+  <section class="tour-section tour-section--surface">
+    <div class="tour-inner tour-split">
+      <div>
+        <p class="tour-eyebrow">Biología · 1 de 4</p>
+        <h2 class="tour-h2">Cada célula guarda un libro de recetas</h2>
+        <p class="tour-lead">En cada célula de nuestro organismo hay un <strong>núcleo</strong> donde se almacena la información genética en forma de <strong>ADN</strong>.</p>
+        <p class="tour-lead">El ADN es una molécula que contiene todas las instrucciones necesarias para que funcione el cuerpo. El manual de instrucciones de la vida.</p>
+      </div>
+      <figure class="tour-figure">
+        <svg viewBox="0 0 200 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Doble hélice de ADN">
+        <line x1="85.1" y1="10.0" x2="114.9" y2="10.0" stroke="#A6B4C2" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="66.6" y1="24.6" x2="133.4" y2="24.6" stroke="#14B8B3" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="55.7" y1="39.2" x2="144.3" y2="39.2" stroke="#A6B4C2" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="55.0" y1="53.8" x2="145.0" y2="53.8" stroke="#14B8B3" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="64.6" y1="68.4" x2="135.4" y2="68.4" stroke="#A6B4C2" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="82.2" y1="83.0" x2="117.8" y2="83.0" stroke="#14B8B3" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="75.2" y1="112.2" x2="124.8" y2="112.2" stroke="#A6B4C2" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="60.1" y1="126.8" x2="139.9" y2="126.8" stroke="#14B8B3" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="54.0" y1="141.4" x2="146.0" y2="141.4" stroke="#A6B4C2" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="58.5" y1="156.0" x2="141.5" y2="156.0" stroke="#14B8B3" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="72.5" y1="170.6" x2="127.5" y2="170.6" stroke="#A6B4C2" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="85.4" y1="199.8" x2="114.6" y2="199.8" stroke="#14B8B3" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="66.8" y1="214.4" x2="133.2" y2="214.4" stroke="#A6B4C2" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="55.8" y1="229.0" x2="144.2" y2="229.0" stroke="#14B8B3" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="54.9" y1="243.6" x2="145.1" y2="243.6" stroke="#A6B4C2" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="64.4" y1="258.2" x2="135.6" y2="258.2" stroke="#14B8B3" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="81.9" y1="272.8" x2="118.1" y2="272.8" stroke="#A6B4C2" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="75.5" y1="302.0" x2="124.5" y2="302.0" stroke="#14B8B3" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="60.2" y1="316.6" x2="139.8" y2="316.6" stroke="#A6B4C2" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="54.0" y1="331.2" x2="146.0" y2="331.2" stroke="#14B8B3" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="58.4" y1="345.8" x2="141.6" y2="345.8" stroke="#A6B4C2" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="72.2" y1="360.4" x2="127.8" y2="360.4" stroke="#14B8B3" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M100.0,0.0 L112.4,8.3 L123.9,16.5 L133.6,24.8 L140.8,33.0 L145.0,41.3 L145.9,49.6 L143.3,57.8 L137.6,66.1 L129.0,74.3 L118.3,82.6 L106.3,90.9 L93.7,99.1 L81.7,107.4 L71.0,115.7 L62.4,123.9 L56.7,132.2 L54.1,140.4 L55.0,148.7 L59.2,157.0 L66.4,165.2 L76.1,173.5 L87.6,181.7 L100.0,190.0 L112.4,198.3 L123.9,206.5 L133.6,214.8 L140.8,223.0 L145.0,231.3 L145.9,239.6 L143.3,247.8 L137.6,256.1 L129.0,264.3 L118.3,272.6 L106.3,280.9 L93.7,289.1 L81.7,297.4 L71.0,305.7 L62.4,313.9 L56.7,322.2 L54.1,330.4 L55.0,338.7 L59.2,347.0 L66.4,355.2 L76.1,363.5 L87.6,371.7 L100.0,380.0" fill="none" stroke="#1652F0" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M100.0,0.0 L87.6,8.3 L76.1,16.5 L66.4,24.8 L59.2,33.0 L55.0,41.3 L54.1,49.6 L56.7,57.8 L62.4,66.1 L71.0,74.3 L81.7,82.6 L93.7,90.9 L106.3,99.1 L118.3,107.4 L129.0,115.7 L137.6,123.9 L143.3,132.2 L145.9,140.4 L145.0,148.7 L140.8,157.0 L133.6,165.2 L123.9,173.5 L112.4,181.7 L100.0,190.0 L87.6,198.3 L76.1,206.5 L66.4,214.8 L59.2,223.0 L55.0,231.3 L54.1,239.6 L56.7,247.8 L62.4,256.1 L71.0,264.3 L81.7,272.6 L93.7,280.9 L106.3,289.1 L118.3,297.4 L129.0,305.7 L137.6,313.9 L143.3,322.2 L145.9,330.4 L145.0,338.7 L140.8,347.0 L133.6,355.2 L123.9,363.5 L112.4,371.7 L100.0,380.0" fill="none" stroke="#0C1E30" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.82"/>
+      </svg>
+        <figcaption class="tour-figcaption">ADN — doble hélice</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 5 · BIOLOGÍA · LOS GENES -->
+  <section class="tour-section">
+    <div class="tour-inner">
+      <p class="tour-eyebrow">Biología · 2 de 4</p>
+      <h2 class="tour-h2">Esa molécula está dividida en genes</h2>
+      <p class="tour-lead">Cada <strong>gen</strong> es una instrucción concreta para hacer una cosa específica. El genoma humano tiene unos <strong>20.000</strong>.</p>
+      <p class="tour-lead">Pero no todos están activos a la vez. Todas las células tienen los mismos genes y cada tipo de célula usa solo algunos: una célula de pulmón enciende un conjunto distinto al de una célula de próstata. Mismo libro, recetas diferentes.</p>
+      <p class="tour-note">A ese nivel de actividad de cada gen se le llama <strong>expresión génica</strong>. Un gen puede estar apagado, a medio gas, o funcionando a pleno rendimiento.</p>
+    </div>
+  </section>
+
+  <!-- 6 · BIOLOGÍA · EL mRNA -->
+  <section class="tour-section tour-section--surface">
+    <div class="tour-inner">
+      <p class="tour-eyebrow">Biología · 3 de 4</p>
+      <h2 class="tour-h2">Un gen activo se copia en ARN mensajero</h2>
+      <p class="tour-lead">Cuando la célula necesita una instrucción, hace <strong>copias temporales</strong> de ese gen. Esas copias se llaman <strong>ARN mensajero</strong> (mRNA). Son la fotocopia que llevas a la cocina para no manchar el libro.</p>
+      <p class="tour-lead">Con esa fotocopia la célula fabrica una <strong>proteína</strong>, y las proteínas hacen todo el trabajo: colágeno para la piel, hemoglobina para transportar oxígeno, enzimas para digerir. Cuanto más se usa una receta, más fotocopias hay.</p>
+      <div class="tour-chain">
+        <div class="tour-chain-node"><span>Núcleo</span><strong>ADN</strong></div>
+        <div class="tour-chain-link" aria-hidden="true">
+          <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M1 7h17M18 7l-5-5M18 7l-5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="tour-chain-node"><span>Segmento</span><strong>Gen activo</strong></div>
+        <div class="tour-chain-link" aria-hidden="true">
+          <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M1 7h17M18 7l-5-5M18 7l-5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="tour-chain-node is-accent"><span>Copia temporal</span><strong>mRNA</strong></div>
+        <div class="tour-chain-link" aria-hidden="true">
+          <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M1 7h17M18 7l-5-5M18 7l-5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="tour-chain-node is-data"><span>Producto</span><strong>Proteína</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · BIOLOGÍA · RNA-SEQ -->
+  <section class="tour-section">
+    <div class="tour-inner">
+      <p class="tour-eyebrow">Biología · 4 de 4</p>
+      <h2 class="tour-h2">RNA-Seq cuenta esas copias</h2>
+      <p class="tour-lead">Es la técnica de laboratorio que mide qué genes están activos en una muestra de tejido, y cuánto.</p>
+      <div class="tour-steps">
+        <div class="tour-step">
+          <span class="tour-step-num">01</span>
+          <div class="tour-step-body"><h4>Extraer</h4><p>Se aísla todo el ARN mensajero presente en la muestra de tejido.</p></div>
+        </div>
+        <div class="tour-step">
+          <span class="tour-step-num">02</span>
+          <div class="tour-step-body"><h4>Secuenciar</h4><p>Se corta en fragmentos pequeños y se identifica de qué gen procede cada uno.</p></div>
+        </div>
+        <div class="tour-step">
+          <span class="tour-step-num">03</span>
+          <div class="tour-step-body"><h4>Contar</h4><p>Se suman las copias de cada gen. Más copias, más activo está ese gen.</p></div>
+        </div>
+        <div class="tour-step">
+          <span class="tour-step-num">04</span>
+          <div class="tour-step-body"><h4>Obtener el perfil</h4><p>Un número por gen: <strong>20.531 valores</strong> que describen ese tejido por completo.</p></div>
+        </div>
+      </div>
+      <p class="tour-note">Un tumor tiene un patrón de expresión distinto al del tejido sano del mismo órgano. Esa diferencia es lo que el modelo aprende a detectar.</p>
+    </div>
+  </section>
+
+  <!-- 8 · QUÉ SOLUCIONA -->
+  <section class="tour-section tour-section--surface">
+    <div class="tour-inner">
+      <p class="tour-eyebrow">Qué soluciona</p>
+      <h2 class="tour-h2">Una segunda capa de evidencia, molecular y rápida</h2>
+      <p class="tour-lead">Determinar el origen de un tumor es hoy trabajo de la histopatología, y en casos ambiguos el margen de duda es real. Un perfil molecular no la reemplaza, pero aporta un criterio independiente basado en datos.</p>
+      <div class="tour-grid">
+        <article class="tour-card">
+          <span class="tour-card-num">01</span>
+          <h3 class="tour-h3">Automatiza el análisis</h3>
+          <p>Clasifica un perfil de 20.531 genes en segundos, sin intervención manual.</p>
+        </article>
+        <article class="tour-card">
+          <span class="tour-card-num">02</span>
+          <h3 class="tour-h3">Explica su decisión</h3>
+          <p>Devuelve qué genes pesaron en el resultado. No es una caja negra.</p>
+        </article>
+        <article class="tour-card">
+          <span class="tour-card-num">03</span>
+          <h3 class="tour-h3">Acelera la investigación</h3>
+          <p>Permite tipificar lotes de muestras y explorar patrones de expresión.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · A QUIÉN VA DIRIGIDO -->
+  <section class="tour-section">
+    <div class="tour-inner">
+      <p class="tour-eyebrow">A quién va dirigido</p>
+      <h2 class="tour-h2">A quien trabaja con datos genómicos, o quiere entenderlos</h2>
+      <div class="tour-limits">
+        <article class="tour-limit">
+          <h4>Investigación en oncología</h4>
+          <p>Grupos que trabajan con perfiles de expresión y necesitan tipificar muestras.</p>
+        </article>
+        <article class="tour-limit">
+          <h4>Laboratorios moleculares</h4>
+          <p>Como herramienta de apoyo y contraste sobre datos ya secuenciados.</p>
+        </article>
+        <article class="tour-limit">
+          <h4>Docencia y aprendizaje</h4>
+          <p>Estudiantes de bioinformática y ciencia de datos que quieren ver un pipeline real de principio a fin.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · LO QUE NO ES -->
+  <section class="tour-section tour-section--surface">
+    <div class="tour-inner">
+      <p class="tour-eyebrow">Lo que no es</p>
+      <h2 class="tour-h2">Los límites, con la misma honestidad</h2>
+      <div class="tour-callout">
+        <span>Aviso</span>
+        <p><strong>OncoLens no es una herramienta diagnóstica.</strong> Es un proyecto académico de apoyo a la investigación. Sus resultados no constituyen un diagnóstico médico ni sustituyen la valoración de un profesional sanitario.</p>
+      </div>
+      <div class="tour-limits">
+        <article class="tour-limit">
+          <h4>Cinco tipos, no todos</h4>
+          <p>Ante un tumor de otro órgano devolvería una de esas cinco etiquetas, necesariamente equivocada.</p>
+        </article>
+        <article class="tour-limit">
+          <h4>Población no representativa</h4>
+          <p>TCGA recoge mayoritariamente población estadounidense. La generalización a otras poblaciones no está validada.</p>
+        </article>
+        <article class="tour-limit">
+          <h4>No sustituye al patólogo</h4>
+          <p>El diagnóstico se establece por histopatología. Esto es una capa complementaria, nunca un reemplazo.</p>
+        </article>
+        <article class="tour-limit">
+          <h4>Sin contexto clínico</h4>
+          <p>El modelo solo ve expresión génica: ni edad, ni sexo, ni historial, ni datos de la biopsia.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · CIERRE + SIGUIENTE -->
+  <section class="tour-section tour-section--end">
+    <div class="tour-end-inner">
+      <p class="tour-end-label">Siguiente apartado</p>
+      <p class="tour-end-next">02 · Los datos y la metodología</p>
+      <button type="button" class="tour-btn-next" onclick="nextApartado()">
+        Continuar
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M13 8L9 4M13 8l-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <p class="tour-hint">También puedes pulsar <kbd>→</kbd> o <kbd>Espacio</kbd></p>
+    </div>
+    <footer class="tour-footer">
+      <p>OncoLens · Proyecto académico · Bootcamp Data Analyst II · 2026</p>
+    </footer>
+  </section>
+
+</main>
+
+<script src="../script-tour.js"></script>
+</body>
+</html>
