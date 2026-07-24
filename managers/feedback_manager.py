@@ -1,4 +1,4 @@
-from streamlit_app.database.cdss_database import CDSSDatabase
+from database.cdss_database import CDSSDatabase
 
 
 class FeedbackManager:

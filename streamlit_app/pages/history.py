@@ -9,7 +9,7 @@ from managers.feedback_manager import FeedbackManager
 from services.retraining import RetrainingService
 from streamlit_app.components.cards import render_kpi_card, render_status_card
 from streamlit_app.components.layout import render_page_header
-from streamlit_app.database.cdss_database import CDSSDatabase
+from database.cdss_database import CDSSDatabase
 
 
 VALID_DIAGNOSES = ["NORMAL", "BRCA", "COAD", "KIRC", "LUAD", "PRAD"]

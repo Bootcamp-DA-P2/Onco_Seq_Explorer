@@ -6,6 +6,7 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List
+import streamlit as st
 
 
 def _first_existing_dir(candidates: Iterable[Path]) -> Path:
@@ -75,6 +76,8 @@ class Config:
     PCA_DATA_CSV_PATH: Path = field(default_factory=lambda: Path(__file__).resolve().parent / "pca" / "pca_data.csv")
 
     DB_PATH: Path = field(default_factory=lambda: Path(__file__).resolve().parent.parent / "database" / "oncoseq.db")
+    SUPABASE_URL: str = field(default="")
+    SUPABASE_KEY: str = field(default="")
 
     CANCER_TYPES: List[str] = field(default_factory=lambda: ["BRCA", "COAD", "KIRC", "LUAD", "PRAD"])
     BINARY_CLASSES: List[str] = field(default_factory=lambda: ["NORMAL", "TUMOR"])
@@ -115,6 +118,8 @@ class Config:
         self.METRICS_DIR = _first_existing_dir([self.REPORTS_DIR / "metrics", self.PROJECT_ROOT / "outputs"])
         self.INTERPRETABILITY_DIR = _first_existing_dir([self.REPORTS_DIR / "interpretability", self.PROJECT_ROOT / "outputs"])
         self.PCA_DIR = _first_existing_dir([self.APP_DIR / "pca", self.REPORTS_DIR / "pca", self.DATA_DIR])
+        self.SUPABASE_URL = st.secrets["SUPABASE_URL"]
+        self.SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
         models_candidates = [
             Path(env_models_dir) if env_models_dir else None,

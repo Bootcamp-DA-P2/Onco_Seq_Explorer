@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from src.config import config
-from streamlit_app.database.cdss_database import CDSSDatabase
+from database.cdss_database import CDSSDatabase
 
 
 class PredictionManager:

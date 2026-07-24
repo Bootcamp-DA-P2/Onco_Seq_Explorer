@@ -13,7 +13,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
 
 from src.config import config
-from streamlit_app.database.cdss_database import CDSSDatabase
+from database.cdss_database import CDSSDatabase
 
 
 class RetrainingService:
