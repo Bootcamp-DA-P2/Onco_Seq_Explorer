@@ -1,0 +1,20 @@
+{
+    "model_name": "Tumor vs Normal",
+    "algorithm": "Logistic Regression",
+    "selected_features": 3000,
+    "classes": [
+        "NORMAL",
+        "TUMOR"
+    ],
+    "metrics": {
+        "balanced_accuracy": 0.9888059701492538,
+        "f1_macro": 0.9743396226415094,
+        "roc_auc": 0.9971496683250415,
+        "kappa": 0.9487024743512372
+    },
+    "best_parameters": {
+        "select__k": 3000,
+        "clf__C": 0.05
+    },
+    "cv_f1_macro": 0.9775
+}

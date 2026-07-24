@@ -1,6 +1,6 @@
 # web/
 
-Sitio público de **OncoSeq Explorer** (landing page + demo interactiva). Es la parte del proyecto pensada para ser vista por cualquiera, no solo para evaluación técnica.
+Sitio público de **OncoLens** (landing page + demo interactiva). Es la parte del proyecto pensada para ser vista por cualquiera, no solo para evaluación técnica.
 
 ## Estructura
 

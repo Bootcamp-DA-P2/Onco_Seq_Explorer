@@ -1,4 +1,4 @@
-"""Canonical application configuration for OncoSeq Explorer."""
+"""Canonical application configuration for OncoLens."""
 
 from __future__ import annotations
 

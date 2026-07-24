@@ -1,1 +1,1 @@
-"""Streamlit UI package for Onco Seq Explorer."""
+"""Streamlit UI package for OncoLens."""

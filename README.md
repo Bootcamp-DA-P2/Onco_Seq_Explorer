@@ -1,4 +1,4 @@
-# 🧬 Onco Seq Explorer
+# 🧬 OncoLens
 
 **Sistema de Clasificación Jerárquica de Cáncer mediante RNA-Seq**
 
@@ -8,7 +8,7 @@ Aplicación profesional, modular y escalable para análisis y predicción de cla
 
 ## 📋 Descripción
 
-**Onco Seq Explorer** es una plataforma completa para:
+**OncoLens** es una plataforma completa para:
 
 - 🔬 **Análisis de Expresión Génica:** Procesamiento y normalización de datos RNA-Seq
 - 🎯 **Predicción Jerárquica:** 
@@ -26,7 +26,7 @@ Aplicación profesional, modular y escalable para análisis y predicción de cla
 ### Estructura de Directorios
 
 ```
-Onco_Seq_Explorer/
+OncoLens/
 │
 ├── app.py                        # Launcher estable: streamlit run app.py
 ├── config.py                     # Configuración centralizada
@@ -75,7 +75,7 @@ Onco_Seq_Explorer/
 ```bash
 # 1. Clonar o descargar
 git clone <repo-url>
-cd Onco_Seq_Explorer
+cd OncoLens
 
 # 2. Crear entorno virtual
 python -m venv .venv
